@@ -1,5 +1,3 @@
-console.log('Ready!!')
-
 var pieChart = null;
 
 const selectCartera = document.getElementById('cartera')
@@ -17,18 +15,12 @@ selectInicio.addEventListener('change',()=>{indicadoresGestion()});
 selectFin.addEventListener('change',()=>{indicadoresGestion()});
 
 function indicadoresGestion(){
-    console.log('--Cambio de valor en el select---')  
     const valorSelectCartera = selectCartera.options[selectCartera.selectedIndex].value;
     const valorSelectEstructura = selectEstructura.options[selectEstructura.selectedIndex].value;
     const valorSelectGestion = selectGestion.options[selectGestion.selectedIndex].value;
     const valorSelectInicio = selectInicio.value;
     const valorSelectFin = selectFin.value;
-    //document.getElementById('spinner').show();
-    console.log({valorSelectCartera})
-    console.log({valorSelectEstructura})
-    console.log({valorSelectGestion})
-    console.log({valorSelectInicio})
-    console.log({valorSelectFin})
+
     if(valorSelectCartera!="" && valorSelectEstructura!=""  && valorSelectGestion!=""  && valorSelectInicio!=""  && valorSelectFin!=""){
       //Realizar la peticion al servidor
         let url = '';
@@ -50,17 +42,10 @@ function indicadoresGestion(){
             let totalCantidades = 0;          
             if(valorSelectGestion == 'gestion') totalCantidades = calcularTotal(res,'cant_gestion');
             else totalCantidades = calcularTotal(res);
-            console.log(totalCantidades);
             res.forEach(el=>{
-                let cantidad = el.cantidad? el.cantidad:el.cant_gestion;
-                
+                let cantidad = el.cantidad? el.cantidad:el.cant_gestion;                
                 el.porcentaje = Math.round((cantidad/totalCantidades) * 10000)/100;
-                
             })
-            
-            //console.log(cantidad);
-            
-
 
             if(valorSelectEstructura == 'saldo_deuda' || valorSelectEstructura == 'capital' || valorSelectEstructura == 'monto_camp'){
                 let rangos = [
@@ -82,8 +67,6 @@ function indicadoresGestion(){
                     rangos[index].deuda   += el.total_deuda;
                     rangos[index].importe += el.total_importe;
                 })
-                //res = rangos
-                console.log({rangos})
                 if(valorSelectGestion!='intensidad')
                     res = rangos.filter(el=>el.porcentaje>0);
                 else{
@@ -136,12 +119,9 @@ function indicadoresGestion(){
                 let datos_cantidad=[];
 
                 res.forEach(el => {
-                    console.log(el)
                     datos_tipo.push(el.tipo);
                     datos_cantidad.push(el.cantidad)
                 });
-                console.log({datos_tipo})
-                console.log({datos_cantidad})
 
                 var oilCanvas = document.getElementById("oilChart");
                 Chart.defaults.global.defaultFontFamily = "Lato";
@@ -163,14 +143,9 @@ function indicadoresGestion(){
                 let datos_cantidad=[];
 
                 res.forEach(el => {
-                    console.log(el)
                     datos_tipo.push(el.tipo);
                     datos_cantidad.push(el.porcentaje)
-                    
                 });
-
-                console.log(datos_tipo)
-                console.log(datos_cantidad)
 
                 //grafica pastell
 
