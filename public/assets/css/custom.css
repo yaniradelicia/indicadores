@@ -1,0 +1,138 @@
+body { 
+    padding-top: 88px;
+    /*padding-bottom: 100px;*/ 
+}
+
+label.requerido:after{
+    content:'*';
+    color: #e23;
+}
+
+.input-xs {
+    height: 30px;
+   /* width: 70px;*/
+    padding: 2px 5px;
+    font-size: 12px;
+    line-height: 1.5; /* If Placeholder of the input is moved up, rem/modify this. */
+    border-radius: 3px;
+    border-color: gray;
+    border-width: 1px;
+  }
+
+.btn-accion-tabla {
+    cursor: pointer;
+    border: none;
+    background: 0;
+    padding: 0 0 0 5px;
+    font-size: 20px ;
+    line-height: 1.5;
+}
+
+.icon-white { color: white; } 
+
+.navbar{
+    background-color: #0F2A54 !important;
+    /*height: 70px;*/
+  }
+
+.tabla-camp{
+    color: #fff;
+    background-color: #206D9C;
+}
+
+/*.spinner.ocultar { 
+    display: none;
+}
+
+.spinner {
+    display: inline-block; 
+}
+
+.spinner:after {
+    display: block;
+}*/
+
+
+
+/*.chart-container {
+    width: 800px;
+    height:450px
+}*/
+
+/* <canvas id="oilChart" width="600" height="400"></canvas> */
+.chart-container-pastel {
+    width: 800px !important;
+    height:500px !important;
+}
+
+
+.cab-camp{
+  color: #fff;
+  background-color: #206D9C;
+}
+
+.total{
+    background-color: #FBD3B2;
+  }
+
+
+.text-barra{
+    color: #2D38E7;
+    font-size: 16px;
+  }
+.width90{
+    width: 90px ;
+}
+
+/* nav */
+
+.navbar.navbar-transparent {
+    /*background-color: transparent !important;*/
+	background: #043715;
+    background: linear-gradient(to right, #043715 0%, #326844 60%, #3D7F53 100%);
+    color: #FFFFFF; 
+  	box-shadow: 0px 5px 50px 0px rgba(0, 0, 0, 0.2);
+}	
+.navbar.navbar-position-absolute{
+    position: fixed;
+    width: 100%;
+    padding-top: 15px;
+	padding-bottom:15px;
+    z-index: 1029; 
+	
+}
+.navbar .navbar-nav .nav-item a.nav-link {
+    display: inline-block;
+    margin: 0 1px;
+    line-height: 1.8em;
+    font-size: 0.9em;
+    font-weight: 400; 
+	border-radius:5px;
+	padding: 5px 15px;
+	text-decoration:none;
+	color:#ffffff;
+	-webkit-transition-duration: 600ms;
+	-o-transition-duration: 600ms;
+	transition-duration: 600ms;
+}	
+.navbar .navbar-nav .nav-item .nav-link i {
+	font-size:1em;
+	
+}
+
+.navbar .navbar-nav .nav-item a.nav-link:hover ,.navbar-nav .nav-item a.nav-link:focus, .navbar-nav .nav-item a.nav-link .active{
+	background :  rgba(255, 255, 255, 0.4);
+}	
+
+ .navbar-nav .nav-item  .active{
+	background :  rgba(255, 255, 255, 0.4);
+}
+
+.navbar-wrapper a{
+	color:#ffffff;
+}
+
+.navbar-toggler span{
+	color:#ffffff;
+}
+/*endnav*/
