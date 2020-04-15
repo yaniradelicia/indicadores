@@ -49,13 +49,14 @@ function indicadoresGestion(){
 
             if(valorSelectEstructura == 'saldo_deuda' || valorSelectEstructura == 'capital' || valorSelectEstructura == 'monto_camp'){
                 let rangos = [
-                    {tipo:'A: [0-500>',cantidad:0,clientes:0,porcentaje:0,capital:0,deuda:0,importe:0},
-                    {tipo:'B: [500-1000>',cantidad:0,clientes:0,porcentaje:0,capital:0,deuda:0,importe:0},
-                    {tipo:'C: [1000-3000>',cantidad:0,clientes:0,porcentaje:0,capital:0,deuda:0,importe:0},
-                    {tipo:'D: [3000-+>',cantidad:0,clientes:0,porcentaje:0,capital:0,deuda:0,importe:0}
+                    {tipo:'A: [0-500>',cantidad:0,clientes:0,porcentaje:0.00,capital:0,deuda:0,importe:0},
+                    {tipo:'B: [500-1000>',cantidad:0,clientes:0,porcentaje:0.00,capital:0,deuda:0,importe:0},
+                    {tipo:'C: [1000-3000>',cantidad:0,clientes:0,porcentaje:0.00,capital:0,deuda:0,importe:0},
+                    {tipo:'D: [3000-+>',cantidad:0,clientes:0,porcentaje:0.00,capital:0,deuda:0,importe:0}
                 ]
                 let index = -1;
                 res.forEach(el=>{
+                    console.log({objeto:el})
                     if(el.tipo>=0 && el.tipo<500 ) index = 0
                     else if(el.tipo>=500 && el.tipo<1000) index = 1
                     else if(el.tipo>=1000 && el.tipo<3000) index = 2
@@ -66,6 +67,7 @@ function indicadoresGestion(){
                     rangos[index].capital += el.total_capital;
                     rangos[index].deuda   += el.total_deuda;
                     rangos[index].importe += el.total_importe;
+                    console.log({rango:rangos[index]})
                 })
                 if(valorSelectGestion!='intensidad')
                     res = rangos.filter(el=>el.porcentaje>0);
