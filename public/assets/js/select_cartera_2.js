@@ -33,7 +33,10 @@ function indicadoresGestion(){
             res.forEach(el=>{
               let cantidad = el.cantidad;
               el.porcentaje = Math.round((cantidad/totalCantidades) * 10000)/100
+              console.log(cantidad)
+              console.log(el.porcentaje)
             })
+            console.log(totalCantidades)
             //////////////////////
 
             ///para rangosss

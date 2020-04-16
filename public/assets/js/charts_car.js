@@ -1,4 +1,4 @@
-var oilCanvas = document.getElementById("oilChart");
+/*var oilCanvas = document.getElementById("oilChart");
 
 Chart.defaults.global.defaultFontFamily = "Lato";
 Chart.defaults.global.defaultFontSize = 18;
@@ -27,4 +27,6 @@ var oilData = {
 var pieChart = new Chart(oilCanvas, {
   type: 'pie',
   data: oilData
-});
+});*/
+
+

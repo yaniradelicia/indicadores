@@ -107,9 +107,12 @@ selectGestor.addEventListener('change',()=>{
             },*/
           }],
           yAxes: [
-            {id: "y-axis-meta"}, 
-            {id: "y-axis-recupero"}, 
-            {id: "y-axis-alcance",position: 'right',}
+            {id: "y-axis-meta",ticks: {beginAtZero:true}}, 
+            {id: "y-axis-recupero",ticks: {beginAtZero:true}}, 
+            {id: "y-axis-alcance",position: 'right',ticks: {beginAtZero:true}},
+            /*{ticks: {
+              beginAtZero:true
+            }}*/
           ]
         }
       };
@@ -208,14 +211,14 @@ selectCartera.addEventListener('change',()=>{
                 labelString: ['Date','dd','gg']
               },*/
             }],
-            yAxes: [{
-              id: "y-axis-meta"
-            }, {
-              id: "y-axis-recupero"
-            }, {
-              id: "y-axis-alcance",
-              position: 'right',
-            }]
+            yAxes: [
+              {id: "y-axis-meta",ticks: {beginAtZero:true}}, 
+              {id: "y-axis-recupero",ticks: {beginAtZero:true}}, 
+              {id: "y-axis-alcance",position: 'right',ticks: {beginAtZero:true}},
+            /*{ticks: {
+              beginAtZero:true
+            }}*/
+          ]
           }
         };
         
