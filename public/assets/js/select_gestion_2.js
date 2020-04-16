@@ -44,7 +44,7 @@ function indicadoresGestion(){
             else totalCantidades = calcularTotal(res);
             res.forEach(el=>{
                 let cantidad = el.cantidad? el.cantidad:el.cant_gestion;                
-                el.porcentaje = Math.round((cantidad/totalCantidades) * 10000)/100;
+                el.porcentaje = cantidad/totalCantidades;
             })
 
             if(valorSelectEstructura == 'saldo_deuda' || valorSelectEstructura == 'capital' || valorSelectEstructura == 'monto_camp'){
@@ -56,7 +56,6 @@ function indicadoresGestion(){
                 ]
                 let index = -1;
                 res.forEach(el=>{
-                    console.log({objeto:el})
                     if(el.tipo>=0 && el.tipo<500 ) index = 0
                     else if(el.tipo>=500 && el.tipo<1000) index = 1
                     else if(el.tipo>=1000 && el.tipo<3000) index = 2
@@ -67,7 +66,6 @@ function indicadoresGestion(){
                     rangos[index].capital += el.total_capital;
                     rangos[index].deuda   += el.total_deuda;
                     rangos[index].importe += el.total_importe;
-                    console.log({rango:rangos[index]})
                 })
                 if(valorSelectGestion!='intensidad')
                     res = rangos.filter(el=>el.porcentaje>0);
