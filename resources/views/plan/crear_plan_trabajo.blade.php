@@ -177,7 +177,17 @@ Indicadores
                             </div>
                             <div class="form-check">
                                 <label class="form-check-label">
-                                    <input class="form-check-input" name="situaciones" type="checkbox" value="SIN DATO" checked>Informal
+                                    <input class="form-check-input" name="situaciones" type="checkbox" value="INFORMAL" checked>Informal
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" name="situaciones" type="checkbox" value="MIXTO" checked>Mixto
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" name="situaciones" type="checkbox" value="SIN DATO" checked>Sin Dato
                                 </label>
                             </div>
                         </div>
@@ -332,7 +342,7 @@ Indicadores
                             </div>
                             <div class="form-check">
                                 <label class="form-check-label">
-                                    <input class="form-check-input pl-1" name="ubics" type="checkbox" value="singestion" checked>Sin Gestión
+                                    <input class="form-check-input pl-1" name="ubics" type="checkbox" value="SG" checked>Sin Gestión
                                 </label>
                             </div>
                         </div>

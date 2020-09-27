@@ -186,7 +186,26 @@ class PlanController extends Controller
         ";
         $usuario=DB::select(DB::raw($sqlUsuario));
 
-        return response()->json(['cobertura' => $cobertura,'contacto' => $contacto,'pdp' => $pdp, 'conf' => $conf, 'usuario' => $usuario]);
+        $sqlneg="
+            select 
+            if(cli_cod,count(cli_cod),0)  as can_clientes, 
+            if(motivo_np,count(motivo_np),0) as can_mot_np
+            FROM
+            (select cli_cod,count(mot_id_FK) as motivo_np
+            from creditoy_cobranzas.gestion_cliente as g
+            right join creditoy_cobranzas.cliente as c on g.cli_id_FK = c.cli_id
+            inner join indicadores.cartera_detalle as cd on c.cli_cod =cd.cuenta
+            where cd.car_id_fk=$car and c.car_id_fk=$car
+            and mot_id_FK=3
+            and date_format(fecha,'%Y-%m') = date_format(now(),'%Y-%m')
+            AND (date_format(ges_cli_fec,'%Y-%m-%d') between '$fecha_i' and '$fecha_f')
+            and cuenta in ($cadena)
+            group By cli_cod
+            ) tt
+        ";
+        $negocio=DB::select(DB::raw($sqlneg));
+
+        return response()->json(['cobertura' => $cobertura,'contacto' => $contacto,'pdp' => $pdp, 'conf' => $conf, 'usuario' => $usuario,'negocio' => $negocio]);
     }
 
     public function mostrarUsuario(Request $request)
@@ -316,10 +335,30 @@ class PlanController extends Controller
                 ) t				
         ";
         $conf=DB::select(DB::raw($sqlConf));
+        $sqlneg="
+            select 
+            if(cli_cod,count(cli_cod),0)  as can_clientes, 
+            if(motivo_np,count(motivo_np),0) as can_mot_np
+            FROM
+            (select cli_cod,count(mot_id_FK) as motivo_np
+            from creditoy_cobranzas.gestion_cliente as g
+            right join creditoy_cobranzas.cliente as c on g.cli_id_FK = c.cli_id
+            inner join indicadores.cartera_detalle as cd on c.cli_cod =cd.cuenta
+            INNER JOIN creditoy_cobranzas.empleado as e ON c.emp_tel_id_FK=e.emp_id
+            where cd.car_id_fk=$car and c.car_id_fk=$car
+            and mot_id_FK=3
+            and date_format(fecha,'%Y-%m') = date_format(now(),'%Y-%m')
+            AND (date_format(ges_cli_fec,'%Y-%m-%d') between '$fecha_i' and '$fecha_f')
+            AND emp_cod=$cod
+            and cuenta in ($cadena)
+            group By cli_cod
+            ) tt
+        ";
+        $negocio=DB::select(DB::raw($sqlneg));
 
 
 
-        return response()->json(['cobertura' => $cobertura,'contacto' => $contacto,'pdp' => $pdp, 'conf' => $conf]);
+        return response()->json(['cobertura' => $cobertura,'contacto' => $contacto,'pdp' => $pdp, 'conf' => $conf,'negocio' => $negocio]);
 
     }
 
@@ -359,141 +398,82 @@ class PlanController extends Controller
         //cuenta,rango_sueldo,dep_ind,prioridad,cal_nom,emp_cod,dep,tramo,capital,saldo_deuda,monto_camp,res_id_FK
         //SELECT 	count(cuenta) as cantidad,emp_cod as usuario
         $sql = "
-        SELECT 	count(cuenta) as cantidad,emp_cod as usuario, emp_nom as usuario_nom
-                FROM
-                (
-                SELECT 	cuenta,cli_nom,cli_tel_tel,rango_sueldo,dep_ind,prioridad,cal_nom,emp_cod,emp_nom,cartera,car,dep,tramo,capital,cap,saldo_deuda,sal,monto_camp,importe,res_id_FK,entidad,nuevo
-                from
-                (SELECT
-                    cuenta,cli_nom,if(cli_tel_tel is null,'0',cli_tel_tel) as cli_tel_tel,
-                                    capital as cap,saldo_deuda as sal,monto_camp as importe,rango_sueldo,dep_ind,prioridad,
-                                    if(cal_nom is null,'SIN CALL',cal_nom) as cal_nom,
-                                    if(emp_cod is null,'NO ASIGNADO',emp_cod) as emp_cod,if(emp_nom is null,'NO ASIGNADO',emp_nom) as emp_nom,
-                                    cartera,cd.car_id_fk as car,
-                            (CASE 
-                                WHEN dep LIKE '%TACNA%' or dep LIKE '%JUNIN%' or dep LIKE '%HUANUCO%' or dep LIKE '%UCAYALI%' or
-                                            dep LIKE '%LORETO%' or dep LIKE '%CUSCO%' or dep LIKE '%OTROS%' or dep LIKE '%MOQUEGUA%' OR
-                                            dep LIKE '%HUANCAVELICA%' or dep LIKE '%SAN MARTIN%' or dep LIKE '%PUNO%' or dep LIKE '%TUMBES%' or 
-                                            dep LIKE '%AYACUCHO%' or dep LIKE '%PASCO%' THEN 'OTROS'
-                                ELSE dep
-                            END) AS dep,
-                        if(tramo <=2016,2016,tramo) AS tramo,
-                        (CASE 
+            SELECT
+                count(cuenta) as cantidad,emp_cod as usuario, emp_nom as usuario_nom
+            FROM 
+            (SELECT
+                cuenta,
+                    cli_nom,
+                    if(cli_tel_tel is null,'0',cli_tel_tel) as cli_tel_tel,
+                    capital as cap,
+                    saldo_deuda as sal,
+                    monto_camp as importe,
+                    rango_sueldo,
+                    dep_ind,
+                    prioridad,
+                    if(cal_nom is null,'SIN CALL',cal_nom) as cal_nom,
+                    if(emp_cod is null,'NO ASIGNADO',emp_cod) as emp_cod,
+                    if(emp_nom is null,'NO ASIGNADO',emp_nom) as emp_nom,
+                    cartera,
+                    cd.car_id_fk as car,
+                    (CASE 
+                            WHEN dep LIKE '%TACNA%' or dep LIKE '%JUNIN%' or dep LIKE '%HUANUCO%' or dep LIKE '%UCAYALI%' or
+                                                    dep LIKE '%LORETO%' or dep LIKE '%CUSCO%' or dep LIKE '%OTROS%' or dep LIKE '%MOQUEGUA%' OR
+                                                    dep LIKE '%HUANCAVELICA%' or dep LIKE '%SAN MARTIN%' or dep LIKE '%PUNO%' or dep LIKE '%TUMBES%' or 
+                                                    dep LIKE '%AYACUCHO%' or dep LIKE '%PASCO%' THEN 'OTROS'
+                            ELSE dep
+                    END) AS dep,
+                    if(tramo <=2016,2016,tramo) AS tramo,
+                    (CASE 
                             WHEN capital <500 THEN 'A'
                             WHEN capital >= 500 and capital < 1000 THEN 'B'
                             WHEN capital >= 1000 and capital < 3000 THEN 'C'
                             WHEN capital >= 3000 THEN 'D'
-                        END) AS capital,
-                        (CASE 
+                    END) AS capital,
+                    (CASE 
                             WHEN saldo_deuda <500 THEN 'A'
                             WHEN saldo_deuda >= 500 and saldo_deuda < 1000 THEN 'B'
                             WHEN saldo_deuda >= 1000 and saldo_deuda < 3000 THEN 'C'
                             WHEN saldo_deuda >= 3000 THEN 'D'
-                        END) AS saldo_deuda,
-                        (CASE 
+                    END) AS saldo_deuda,
+                    (CASE 
                             WHEN monto_camp <500 THEN 'A'
                             WHEN monto_camp >= 500 and monto_camp < 1000 THEN 'B'
                             WHEN monto_camp >= 1000 and monto_camp < 3000 THEN 'C'
                             WHEN monto_camp >= 3000 THEN 'D'
-                        END) AS monto_camp,
-                        (CASE 
-                        WHEN res_id_FK IN ( 38, 6, 22, 41 ) THEN 'cfrn'
-                        WHEN res_id_FK IN ( 2, 37, 33, 18, 10, 1, 8, 43, 39, 7 ) THEN 'contacto'
-                        WHEN res_id_FK IN ( 34, 17, 21 ) THEN 'nodisponible'
-                        WHEN res_id_FK IN ( 19, 27, 12, 26, 13 ) THEN 'inubicable'
-                        WHEN res_id_FK IN ( 4,45,44, 25,32 ) THEN 'nocontacto'
-                        ELSE 'NO ENCONTRADO'
-                    END) AS res_id_FK,
-                    (CASE 
-						WHEN entidades like '%1%' or entidades = 2 THEN 2
-						WHEN entidades like '%2%' or entidades = 3 THEN 3
-						WHEN entidades like '%3%' or entidades >= 4 THEN 4
-						ELSE 1
-                    END) AS entidad,
-                    if(cli_nuev_cod is null,'NO','NUEVO') as nuevo
-                    FROM
-                    creditoy_cobranzas.cliente AS c
-                                    INNER JOIN creditoy_cobranzas.cliente_telefono as tele
-                                    on c.cli_id=tele.cli_id_FK
-                    INNER JOIN indicadores.cartera_detalle AS cd ON c.cli_cod = cd.cuenta 
-                    INNER JOIN(select max(ges_cli_id) as maxid,cli_id_FK from creditoy_cobranzas.gestion_cliente where date_format( ges_cli_fec, '%Y-%m' ) = date_format( now(), '%Y-%m' ) GROUP BY cli_id_FK) as g
-                    on g.cli_id_FK=c.cli_id
-                    inner join creditoy_cobranzas.gestion_cliente as gg on gg.ges_cli_id=g.maxid
-                            left JOIN creditoy_cobranzas.empleado as e on c.emp_tel_id_FK=e.emp_id
-                            left JOIN creditoy_cobranzas.call_telefonica as cal on e.cal_id_FK=cal.cal_id
-                            LEFT JOIN creditoy_cobranzas.nuevo_cliente as cn on c.cli_cod=cn.cli_nuev_cod
-                    WHERE c.car_id_FK =$car
-                                    and cli_tel_est=0 and cli_tel_pas=0
-                    AND cli_est =0 and cli_pas=0
-                    AND date_format( ges_cli_fec, '%Y-%m' ) = date_format( now(), '%Y-%m' )
-                    AND date_format( fecha, '%Y-%m' ) = date_format( now(), '%Y-%m' )
-                            GROUP BY	
-                    cli_cod
-                
-                UNION ALL 
-                
-                SELECT cuenta,cli_nom,if(cli_tel_tel is null,'0',cli_tel_tel) as cli_tel_tel,
-                                    capital as cap,saldo_deuda as sal,monto_camp as importe,rango_sueldo,dep_ind,prioridad,
-                                    if(cal_nom is null,'SIN CALL',cal_nom) as cal_nom,
-                                    if(emp_cod is null,'NO ASIGNADO',emp_cod) as emp_cod,if(emp_nom is null,'NO ASIGNADO',emp_nom) as emp_nom,
-                                    cartera,cd.car_id_fk as car,
-                            (CASE 
-                        WHEN dep LIKE '%TACNA%' or dep LIKE '%JUNIN%' or dep LIKE '%HUANUCO%' or dep LIKE '%UCAYALI%' or
-                                    dep LIKE '%LORETO%' or dep LIKE '%CUSCO%' or dep LIKE '%OTROS%' or dep LIKE '%MOQUEGUA%' OR
-                                    dep LIKE '%HUANCAVELICA%' or dep LIKE '%SAN MARTIN%' or dep LIKE '%PUNO%' or dep LIKE '%TUMBES%' or 
-                                    dep LIKE '%AYACUCHO%' or dep LIKE '%PASCO%' THEN 'OTROS'
-                        ELSE dep
-                    END) AS dep,
-                    if(tramo <=2016,2016,tramo) AS tramo,
-                    (CASE 
-                        WHEN capital <500 THEN 'A'
-                        WHEN capital >= 500 and capital < 1000 THEN 'B'
-                        WHEN capital >= 1000 and capital < 3000 THEN 'C'
-                        WHEN capital >= 3000 THEN 'D'
-                    END) AS capital,
-                    (CASE 
-                        WHEN saldo_deuda <500 THEN 'A'
-                        WHEN saldo_deuda >= 500 and saldo_deuda < 1000 THEN 'B'
-                        WHEN saldo_deuda >= 1000 and saldo_deuda < 3000 THEN 'C'
-                        WHEN saldo_deuda >= 3000 THEN 'D'
-                    END) AS saldo_deuda,
-                    (CASE 
-                        WHEN monto_camp <500 THEN 'A'
-                        WHEN monto_camp >= 500 and monto_camp < 1000 THEN 'B'
-                        WHEN monto_camp >= 1000 and monto_camp < 3000 THEN 'C'
-                        WHEN monto_camp >= 3000 THEN 'D'
                     END) AS monto_camp,
-                    'singestion' as res_id_FK,
                     (CASE 
-                        WHEN entidades like '%1%' or entidades = 2 THEN 2
-                        WHEN entidades like '%2%' or entidades = 3 THEN 3
-                        WHEN entidades like '%3%' or entidades >= 4 THEN 4
-												ELSE 1
-                    END) AS entidad,
-                    if(cli_nuev_cod is null,'NO','NUEVO') as nuevo
-                FROM
-                        (SELECT 
-                            cli_cod,emp_tel_id_FK,cli_nom, cli_tel_tel
-                        FROM
-                            creditoy_cobranzas.cliente as clie
-                                        INNER JOIN creditoy_cobranzas.cliente_telefono as tele
-                                        on clie.cli_id=tele.cli_id_FK
-                        WHERE
-                            car_id_FK =$car
-                                        and cli_tel_est=0 and cli_tel_pas=0
-                        AND cli_est =0 and cli_pas=0
-                        and (SELECT count(*) FROM creditoy_cobranzas.gestion_cliente WHERE cli_id_FK=cli_id and DATE_FORMAT(ges_cli_fec,'%Y-%m')=date_format( now(), '%Y-%m' ))=0
-                        GROUP BY	
-                        cli_cod) a
-                INNER JOIN indicadores.cartera_detalle AS cd ON a.cli_cod = cd.cuenta
-                left JOIN creditoy_cobranzas.empleado as e on a.emp_tel_id_FK=e.emp_id
-                left JOIN creditoy_cobranzas.call_telefonica as cal on e.cal_id_FK=cal.cal_id
-                LEFT JOIN creditoy_cobranzas.nuevo_cliente as cn on a.cli_cod=cn.cli_nuev_cod
-                WHERE cd.car_id_fk =$car
-                AND date_format( fecha, '%Y-%m' ) =date_format( now(), '%Y-%m' )
-                GROUP BY cuenta
-            ) x
-            ) W
+                            WHEN ges_cli_fec IS NULL OR DATE_FORMAT(ges_cli_fec,'%Y%m')<DATE_FORMAT(NOW(),'%Y%m') THEN 'SG' 
+                            WHEN res_id_FK IN ( 38, 6, 22, 41 ) THEN 'cfrn'
+                            WHEN res_id_FK IN ( 2,37,33,10,1,8,43,39,7,3,5,9,34,17,21,18,28,30,35,36,46,47,48,49 ) THEN 'contacto'
+                            WHEN res_id_FK IN ( 32 ) THEN 'nodisponible'
+                            WHEN res_id_FK IN ( 19,27,12,26,13,4,11,12,20,14,15,16,23,24,29,31 ) THEN 'inubicable'
+                            WHEN res_id_FK IN ( 45,44, 25 ) THEN 'nocontacto'
+                            ELSE 'NO ENCONTRADO'
+                    END) AS res_id_FK,
+                (CASE 
+                    WHEN entidades like '%1%' or entidades = 2 THEN 2
+                    WHEN entidades like '%2%' or entidades = 3 THEN 3
+                    WHEN entidades like '%3%' or entidades >= 4 THEN 4
+                    ELSE 1
+                END) AS entidad,
+                if(cli_nuev_cod is null,'NO','NUEVO') as nuevo
+            FROM
+                indicadores.cartera_detalle cd
+            INNER JOIN creditoy_cobranzas.cliente c ON c.cli_cod = cd.cuenta
+            LEFT JOIN creditoy_cobranzas.cliente_telefono as tele on c.cli_id=tele.cli_id_FK and cli_tel_est=0 and cli_tel_pas=0
+            left JOIN creditoy_cobranzas.empleado as e on c.emp_tel_id_FK=e.emp_id
+            left JOIN creditoy_cobranzas.call_telefonica as cal on e.cal_id_FK=cal.cal_id
+            LEFT JOIN creditoy_cobranzas.nuevo_cliente as cn on c.cli_cod=cn.cli_nuev_cod
+            LEFT JOIN gestion_cliente g on c.ges_cli_tel_id_FK=g.ges_cli_id
+            WHERE 
+                    cli_est=0
+                and cli_pas=0
+                and c.car_id_fk=$car
+                and date_format(cd.fecha,'%Y%m')=date_format(now(),'%Y%m') 
+                and cd.car_id_FK=$car
+            GROUP BY cuenta
+            )t
         where ";
         $cont=0;
         if($tramos!= "null" && $cont>0){
@@ -740,151 +720,94 @@ class PlanController extends Controller
         //dd($usuarios!= [""]);
         $des="";
         $sql = "
-        SELECT 	cuenta,cli_nom,capital,cap,saldo_deuda,sal,monto_camp,importe,emp_cod,emp_nom,cli_tel_tel,res_id_FK,
-                        (CASE 
+            SELECT cuenta,cli_nom,cli_tel_tel,cap,sal,importe,rango_sueldo,dep_ind,prioridad,
+                    cal_nom,emp_cod,emp_nom,cartera,car,dep,tramo,capital,saldo_deuda,monto_camp,
+                    entidad,nuevo,res_id_FK,
+                    (CASE 
                         WHEN res_id_FK LIKE 'nocontacto%' THEN 'NO CONTACTO'
                         WHEN res_id_FK LIKE 'inubicable%' THEN 'INUBICABLE'
-                        WHEN res_id_FK LIKE 'contacto%' THEN 'CONTACTO'
-                        WHEN res_id_FK LIKE 'nodisponible%' THEN 'NO DISPONIBLE'
-                        WHEN res_id_FK LIKE 'cfrn%' THEN 'CFRN'
-                        WHEN res_id_FK LIKE 'singestion%' THEN 'SIN GESTIÓN'
-                    END) AS respuesta,
-                    cal_nom,cartera,car
-                FROM
-                (
-                SELECT 	cuenta,cli_nom,cli_tel_tel,rango_sueldo,dep_ind,prioridad,cal_nom,emp_cod,emp_nom,cartera,car,dep,tramo,capital,cap,saldo_deuda,sal,monto_camp,importe,res_id_FK,entidad,nuevo
-                from
-                (SELECT
-                    cuenta,cli_nom,if(cli_tel_tel is null,'0',cli_tel_tel) as cli_tel_tel,
-                                    capital as cap,saldo_deuda as sal,monto_camp as importe,rango_sueldo,dep_ind,prioridad,
-                                    if(cal_nom is null,'SIN CALL',cal_nom) as cal_nom,
-                                    if(emp_cod is null,'NO ASIGNADO',emp_cod) as emp_cod,if(emp_nom is null,'NO ASIGNADO',emp_nom) as emp_nom,
-                                    cartera,cd.car_id_fk as car,
-                            (CASE 
-                                WHEN dep LIKE '%TACNA%' or dep LIKE '%JUNIN%' or dep LIKE '%HUANUCO%' or dep LIKE '%UCAYALI%' or
-                                            dep LIKE '%LORETO%' or dep LIKE '%CUSCO%' or dep LIKE '%OTROS%' or dep LIKE '%MOQUEGUA%' OR
-                                            dep LIKE '%HUANCAVELICA%' or dep LIKE '%SAN MARTIN%' or dep LIKE '%PUNO%' or dep LIKE '%TUMBES%' or 
-                                            dep LIKE '%AYACUCHO%' or dep LIKE '%PASCO%' THEN 'OTROS'
-                                ELSE dep
-                            END) AS dep,
-                        if(tramo <=2016,2016,tramo) AS tramo,
-                        (CASE 
-                            WHEN capital <500 THEN 'A'
-                            WHEN capital >= 500 and capital < 1000 THEN 'B'
-                            WHEN capital >= 1000 and capital < 3000 THEN 'C'
-                            WHEN capital >= 3000 THEN 'D'
-                        END) AS capital,
-                        (CASE 
-                            WHEN saldo_deuda <500 THEN 'A'
-                            WHEN saldo_deuda >= 500 and saldo_deuda < 1000 THEN 'B'
-                            WHEN saldo_deuda >= 1000 and saldo_deuda < 3000 THEN 'C'
-                            WHEN saldo_deuda >= 3000 THEN 'D'
-                        END) AS saldo_deuda,
-                        (CASE 
-                            WHEN monto_camp <500 THEN 'A'
-                            WHEN monto_camp >= 500 and monto_camp < 1000 THEN 'B'
-                            WHEN monto_camp >= 1000 and monto_camp < 3000 THEN 'C'
-                            WHEN monto_camp >= 3000 THEN 'D'
-                        END) AS monto_camp,
-                        (CASE 
-                        WHEN res_id_FK IN ( 38, 6, 22, 41 ) THEN 'cfrn'
-                        WHEN res_id_FK IN ( 2, 37, 33, 18, 10, 1, 8, 43, 39, 7 ) THEN 'contacto'
-                        WHEN res_id_FK IN ( 34, 17, 21 ) THEN 'nodisponible'
-                        WHEN res_id_FK IN ( 19, 27, 12, 26, 13 ) THEN 'inubicable'
-                        WHEN res_id_FK IN ( 4,45,44, 25,32 ) THEN 'nocontacto'
-                        ELSE 'NO ENCONTRADO'
-                    END) AS res_id_FK,
-                    (CASE 
-						WHEN entidades like '%1%' or entidades = 2 THEN 2
-						WHEN entidades like '%2%' or entidades = 3 THEN 3
-						WHEN entidades like '%3%' or entidades >= 4 THEN 4
-						ELSE 1
-                    END) AS entidad,
-                    if(cli_nuev_cod is null,'NO','NUEVO') as nuevo
-                    FROM
-                    creditoy_cobranzas.cliente AS c
-                                    INNER JOIN creditoy_cobranzas.cliente_telefono as tele
-                                    on c.cli_id=tele.cli_id_FK
-                    INNER JOIN indicadores.cartera_detalle AS cd ON c.cli_cod = cd.cuenta 
-                    INNER JOIN(select max(ges_cli_id) as maxid,cli_id_FK from creditoy_cobranzas.gestion_cliente where date_format( ges_cli_fec, '%Y-%m' ) = date_format( now(), '%Y-%m' ) GROUP BY cli_id_FK) as g
-                    on g.cli_id_FK=c.cli_id
-                    inner join creditoy_cobranzas.gestion_cliente as gg on gg.ges_cli_id=g.maxid
-                            left JOIN creditoy_cobranzas.empleado as e on c.emp_tel_id_FK=e.emp_id
-                            left JOIN creditoy_cobranzas.call_telefonica as cal on e.cal_id_FK=cal.cal_id
-                            LEFT JOIN creditoy_cobranzas.nuevo_cliente as cn on c.cli_cod=cn.cli_nuev_cod
-                    WHERE c.car_id_FK =$car
-                                    and cli_tel_est=0 and cli_tel_pas=0
-                    AND cli_est =0 and cli_pas=0
-                    AND date_format( ges_cli_fec, '%Y-%m' ) = date_format( now(), '%Y-%m' )
-                    AND date_format( fecha, '%Y-%m' ) = date_format( now(), '%Y-%m' )
-                            GROUP BY	
-                    cli_cod
-                
-                UNION ALL 
-                
-                SELECT cuenta,cli_nom,if(cli_tel_tel is null,'0',cli_tel_tel) as cli_tel_tel,
-                                    capital as cap,saldo_deuda as sal,monto_camp as importe,rango_sueldo,dep_ind,prioridad,
-                                    if(cal_nom is null,'SIN CALL',cal_nom) as cal_nom,
-                                    if(emp_cod is null,'NO ASIGNADO',emp_cod) as emp_cod,if(emp_nom is null,'NO ASIGNADO',emp_nom) as emp_nom,
-                                    cartera,cd.car_id_fk as car,
-                            (CASE 
+            WHEN res_id_FK LIKE 'contacto%' THEN 'CONTACTO'
+            WHEN res_id_FK LIKE 'nodisponible%' THEN 'NO DISPONIBLE'
+            WHEN res_id_FK LIKE 'cfrn%' THEN 'CFRN'
+            WHEN res_id_FK LIKE 'SG%' THEN 'SIN GESTIÓN'
+                END) AS respuesta
+            FROM
+            (
+            SELECT
+            cuenta,
+                cli_nom,
+                if(cli_tel_tel is null,'0',cli_tel_tel) as cli_tel_tel,
+                capital as cap,
+                saldo_deuda as sal,
+                monto_camp as importe,
+                rango_sueldo,
+                dep_ind,
+                prioridad,
+                if(cal_nom is null,'SIN CALL',cal_nom) as cal_nom,
+                if(emp_cod is null,'NO ASIGNADO',emp_cod) as emp_cod,
+                if(emp_nom is null,'NO ASIGNADO',emp_nom) as emp_nom,
+                cartera,
+                cd.car_id_fk as car,
+                (CASE 
                         WHEN dep LIKE '%TACNA%' or dep LIKE '%JUNIN%' or dep LIKE '%HUANUCO%' or dep LIKE '%UCAYALI%' or
-                                    dep LIKE '%LORETO%' or dep LIKE '%CUSCO%' or dep LIKE '%OTROS%' or dep LIKE '%MOQUEGUA%' OR
-                                    dep LIKE '%HUANCAVELICA%' or dep LIKE '%SAN MARTIN%' or dep LIKE '%PUNO%' or dep LIKE '%TUMBES%' or 
-                                    dep LIKE '%AYACUCHO%' or dep LIKE '%PASCO%' THEN 'OTROS'
+                                                dep LIKE '%LORETO%' or dep LIKE '%CUSCO%' or dep LIKE '%OTROS%' or dep LIKE '%MOQUEGUA%' OR
+                                                dep LIKE '%HUANCAVELICA%' or dep LIKE '%SAN MARTIN%' or dep LIKE '%PUNO%' or dep LIKE '%TUMBES%' or 
+                                                dep LIKE '%AYACUCHO%' or dep LIKE '%PASCO%' THEN 'OTROS'
                         ELSE dep
-                    END) AS dep,
-                    if(tramo <=2016,2016,tramo) AS tramo,
-                    (CASE 
+                END) AS dep,
+                if(tramo <=2016,2016,tramo) AS tramo,
+                (CASE 
                         WHEN capital <500 THEN 'A'
                         WHEN capital >= 500 and capital < 1000 THEN 'B'
                         WHEN capital >= 1000 and capital < 3000 THEN 'C'
                         WHEN capital >= 3000 THEN 'D'
-                    END) AS capital,
-                    (CASE 
+                END) AS capital,
+                (CASE 
                         WHEN saldo_deuda <500 THEN 'A'
                         WHEN saldo_deuda >= 500 and saldo_deuda < 1000 THEN 'B'
                         WHEN saldo_deuda >= 1000 and saldo_deuda < 3000 THEN 'C'
                         WHEN saldo_deuda >= 3000 THEN 'D'
-                    END) AS saldo_deuda,
-                    (CASE 
+                END) AS saldo_deuda,
+                (CASE 
                         WHEN monto_camp <500 THEN 'A'
                         WHEN monto_camp >= 500 and monto_camp < 1000 THEN 'B'
                         WHEN monto_camp >= 1000 and monto_camp < 3000 THEN 'C'
                         WHEN monto_camp >= 3000 THEN 'D'
-                    END) AS monto_camp,
-                    'singestion' as res_id_FK,
-                    (CASE 
-                        WHEN entidades like '%1%' or entidades = 2 THEN 2
-                        WHEN entidades like '%2%' or entidades = 3 THEN 3
-                        WHEN entidades like '%3%' or entidades >= 4 THEN 4
-												ELSE 1
-                    END) AS entidad,
-                    if(cli_nuev_cod is null,'NO','NUEVO') as nuevo
-                FROM
-                        (SELECT 
-                            cli_cod,emp_tel_id_FK,cli_nom, cli_tel_tel
-                        FROM
-                            creditoy_cobranzas.cliente as clie
-                                        INNER JOIN creditoy_cobranzas.cliente_telefono as tele
-                                        on clie.cli_id=tele.cli_id_FK
-                        WHERE
-                            car_id_FK =$car
-                                        and cli_tel_est=0 and cli_tel_pas=0
-                        AND cli_est =0 and cli_pas=0
-                        and (SELECT count(*) FROM creditoy_cobranzas.gestion_cliente WHERE cli_id_FK=cli_id and DATE_FORMAT(ges_cli_fec,'%Y-%m')=date_format( now(), '%Y-%m' ))=0
-                        GROUP BY	
-                        cli_cod) a
-                INNER JOIN indicadores.cartera_detalle AS cd ON a.cli_cod = cd.cuenta
-                left JOIN creditoy_cobranzas.empleado as e on a.emp_tel_id_FK=e.emp_id
-                left JOIN creditoy_cobranzas.call_telefonica as cal on e.cal_id_FK=cal.cal_id
-                LEFT JOIN creditoy_cobranzas.nuevo_cliente as cn on a.cli_cod=cn.cli_nuev_cod
-                WHERE cd.car_id_fk =$car
-                AND date_format( fecha, '%Y-%m' ) =date_format( now(), '%Y-%m' )
-                GROUP BY cuenta
-            ) x
-            ) W
-        where ";
+                END) AS monto_camp,
+                (CASE 
+                        WHEN ges_cli_fec IS NULL OR DATE_FORMAT(ges_cli_fec,'%Y%m')<DATE_FORMAT(NOW(),'%Y%m') THEN 'SG' 
+                        WHEN res_id_FK IN ( 38, 6, 22, 41 ) THEN 'cfrn'
+                        WHEN res_id_FK IN ( 2,37,33,10,1,8,43,39,7,3,5,9,34,17,21,18,28,30,35,36,46,47,48,49 ) THEN 'contacto'
+                        WHEN res_id_FK IN ( 32 ) THEN 'nodisponible'
+                        WHEN res_id_FK IN ( 19,27,12,26,13,4,11,12,20,14,15,16,23,24,29,31 ) THEN 'inubicable'
+                        WHEN res_id_FK IN ( 45,44, 25 ) THEN 'nocontacto'
+                        ELSE 'NO ENCONTRADO'
+                END) AS res_id_FK,
+            (CASE 
+                WHEN entidades like '%1%' or entidades = 2 THEN 2
+                WHEN entidades like '%2%' or entidades = 3 THEN 3
+                WHEN entidades like '%3%' or entidades >= 4 THEN 4
+                ELSE 1
+            END) AS entidad,
+            if(cli_nuev_cod is null,'NO','NUEVO') as nuevo
+            FROM
+                indicadores.cartera_detalle cd
+            INNER JOIN creditoy_cobranzas.cliente c ON c.cli_cod = cd.cuenta
+            LEFT JOIN creditoy_cobranzas.cliente_telefono as tele on c.cli_id=tele.cli_id_FK and cli_tel_est=0 and cli_tel_pas=0
+            left JOIN creditoy_cobranzas.empleado as e on c.emp_tel_id_FK=e.emp_id
+            left JOIN creditoy_cobranzas.call_telefonica as cal on e.cal_id_FK=cal.cal_id
+            LEFT JOIN creditoy_cobranzas.nuevo_cliente as cn on c.cli_cod=cn.cli_nuev_cod
+            LEFT JOIN gestion_cliente g on c.ges_cli_tel_id_FK=g.ges_cli_id
+            WHERE 
+                    cli_est=0
+                and cli_pas=0
+                and c.car_id_fk=$car
+                and date_format(cd.fecha,'%Y%m')=date_format(now(),'%Y%m') 
+                and cd.car_id_FK=$car
+            GROUP BY cuenta
+            ) t
+            where 
+        ";
 
         $cont=0;
         $espacio="";
@@ -971,40 +894,68 @@ class PlanController extends Controller
         if($prioridades!= "null" && $cont>0){
             $sql=$sql." and (";
             $des=$des."; Prioridad: ";
+            $k="";
             for($i=0;$i<$lengthPrio;$i++){ 
                 $sql = $sql." prioridad LIKE '%".$prioridades[$i]."%'".(($i == $lengthPrio-1)?"":" OR");
-                $des=$des."".$prioridades[$i]."".(($i == $lengthPrio-1)?"":",");
+                if($lengthPrio==4){
+                    $k = "TODOS";
+                }else{
+                    $k=$k."".$prioridades[$i]."".(($i == $lengthPrio-1)?"":",");
+                }
+                //$des=$des."".$prioridades[$i]."".(($i == $lengthPrio-1)?"":",");
                 $cont=1;
             }
+            $des=$des.$k;
             $sql=$sql." ) ";
         }else if ($prioridades!= "null" && $cont==0){
             $sql=$sql." ( ";
             $des=$des."Prioridad: ";
+            $k="";
             for($i=0;$i<$lengthPrio;$i++){ 
                 $sql = $sql." prioridad LIKE '%".$prioridades[$i]."%'".(($i == $lengthPrio-1)?"":" OR");
-                $des=$des."".$prioridades[$i]."".(($i == $lengthPrio-1)?"":",");
+                if($lengthPrio==4){
+                    $k = "TODOS";
+                }else{
+                    $k=$k."".$prioridades[$i]."".(($i == $lengthPrio-1)?"":",");
+                }
+                //$des=$des."".$prioridades[$i]."".(($i == $lengthPrio-1)?"":",");
                 $cont=1;
             }
+            $des=$des.$k;
             $sql=$sql." ) ";
         }
         //----------------------situacion----------------
         if($situaciones!= "null" && $cont>0){
             $sql=$sql." and (";
             $des=$des."; Situación Laboral: ";
+            $l="";
             for($i=0;$i<$lengthSitu;$i++){ 
                 $sql = $sql." dep_ind LIKE '".$situaciones[$i]."%'".(($i == $lengthSitu-1)?"":" OR");
-                $des=$des."".$situaciones[$i]."".(($i == $lengthSitu-1)?"":",");
+                if($lengthSitu==5){
+                    $l = "TODOS";
+                }else{
+                    $l=$l."".$situaciones[$i]."".(($i == $lengthSitu-1)?"":",");
+                }
+                //$des=$des."".$situaciones[$i]."".(($i == $lengthSitu-1)?"":",");
                 $cont=1;
             }
+            $des=$des.$l;
             $sql=$sql." ) ";
         }else if ($situaciones!= "null" && $cont==0){
             $sql=$sql." (";
             $des=$des."Situación Laboral: ";
-            for($i=0;$i<$lengthPrio;$i++){ 
+            $l="";
+            for($i=0;$i<$lengthSitu;$i++){ 
                 $sql = $sql." dep_ind LIKE '".$situaciones[$i]."%'".(($i == $lengthSitu-1)?"":" OR");
-                $des=$des."".$situaciones[$i]."".(($i == $lengthSitu-1)?"":",");
+                if($lengthSitu==5){
+                    $l = "TODOS";
+                }else{
+                    $l=$l."".$situaciones[$i]."".(($i == $lengthSitu-1)?"":",");
+                }
+                //$des=$des."".$situaciones[$i]."".(($i == $lengthSitu-1)?"":",");
                 $cont=1;
             }
+            $des=$des.$l;
             $sql=$sql." ) ";
         }
 
@@ -1012,20 +963,34 @@ class PlanController extends Controller
         if($calls!= "null" && $cont>0){
             $sql=$sql." and (";
             $des=$des."; Call: ";
+            $m="";
             for($i=0;$i<$lengthCalls;$i++){ 
                 $sql = $sql." cal_nom LIKE '%".$calls[$i]."%'".(($i == $lengthCalls-1)?"":" OR");
-                $des=$des."".$calls[$i]."".(($i == $lengthCalls-1)?"":",");
+                if($lengthCalls==4){
+                    $m = "TODOS";
+                }else{
+                    $m=$m."".$calls[$i]."".(($i == $lengthCalls-1)?"":",");
+                }
+                //$des=$des."".$calls[$i]."".(($i == $lengthCalls-1)?"":",");
                 $cont=1;
             }
+            $des=$des.$m;
             $sql=$sql." ) ";
         }else if ($calls!= "null" && $cont==0){
             $sql=$sql." ( ";
             $des=$des."Call: ";
+            $m="";
             for($i=0;$i<$lengthCalls;$i++){ 
                 $sql = $sql." cal_nom LIKE '%".$calls[$i]."%'".(($i == $lengthCalls-1)?"":" OR");
-                $des=$des."".$calls[$i]."".(($i == $lengthCalls-1)?"":",");
+                if($lengthCalls==4){
+                    $m = "TODOS";
+                }else{
+                    $m=$m."".$calls[$i]."".(($i == $lengthCalls-1)?"":",");
+                }
+                //$des=$des."".$calls[$i]."".(($i == $lengthCalls-1)?"":",");
                 $cont=1;
             }
+            $des=$des.$m;
             $sql=$sql." ) ";
         }
 
@@ -1301,20 +1266,34 @@ class PlanController extends Controller
         if($entidades!= "null" && $cont>0){
             $sql=$sql." and (";
             $des=$des."; Entidades: ";
+            $p="";
             for($i=0;$i<$lengthEntidades;$i++){ 
                 $sql = $sql." entidad = '".$entidades[$i]."'".(($i == $lengthEntidades-1)?"":" OR");
-                $des=$des."".$entidades[$i]."".(($i == $lengthEntidades-1)?"":",");
+                if($lengthEntidades==4){
+                    $p = "TODOS";
+                }else{
+                    $p=$p."".$entidades[$i]."".(($i == $lengthEntidades-1)?"":",");
+                }
+                //$des=$des."".$entidades[$i]."".(($i == $lengthEntidades-1)?"":",");
                 $cont=1;
             }
+            $des=$des.$p;
             $sql=$sql." ) ";
         }else if ($entidades!= "null" && $cont==0){
             $sql=$sql." ( ";
             $des=$des."Entidades: ";
+            $p="";
             for($i=0;$i<$lengthEntidades;$i++){ 
                 $sql = $sql." entidad = '".$entidades[$i]."'".(($i == $lengthEntidades-1)?"":" OR");
-                $des=$des."".$entidades[$i]."".(($i == $lengthEntidades-1)?"":",");
+                if($lengthEntidades==4){
+                    $p = "TODOS";
+                }else{
+                    $p=$p."".$entidades[$i]."".(($i == $lengthEntidades-1)?"":",");
+                }
+                //$des=$des."".$entidades[$i]."".(($i == $lengthEntidades-1)?"":",");
                 $cont=1;
             }
+            $des=$des.$p;
             $sql=$sql." ) ";
         }
 

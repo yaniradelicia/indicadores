@@ -25,14 +25,15 @@ const cargandoFiltro= document.getElementById('cargando-filtro')
 const cargandoResultado= document.getElementById('cargando-resultado')
 const cargandoDetalle= document.getElementById('cargando-detalle')
 const cargandoUsuario= document.getElementById('cargando-usuario')
+const contenedorTabla = document.getElementById('tabla');
+const contenedorPag = document.getElementById('developer_page');
 botonBuscar.addEventListener('click',(event)=>{event.preventDefault();selectBuscar()});
 
 function selectBuscar(){
+    contenedorTabla.innerHTML = '';
     const selectCartera = document.getElementById('cartera')
     const selectFec_i = document.getElementById('fec_i')
     const selectFec_f = document.getElementById('fec_f')
-
-    const contenedorTabla = document.getElementById('tabla');
 
     const valorSelectCartera = selectCartera.options[selectCartera.selectedIndex].value;
     const valorSelectFec_i = selectFec_i.value;
@@ -44,8 +45,8 @@ function selectBuscar(){
 
     if(validaForm()){
         cargandoFiltro.style.display = '';
-        //fetch('/indicadores/public/plan/filtro?car='+(valorSelectCartera || null)+'&fec_i='+(valorSelectFec_i || null)+'&fec_f='+(valorSelectFec_f || null))
-        fetch('/plan/filtro?car='+(valorSelectCartera || null)+'&fec_i='+(valorSelectFec_i || null)+'&fec_f='+(valorSelectFec_f || null))
+        fetch('/indicadores/public/plan/filtro?car='+(valorSelectCartera || null)+'&fec_i='+(valorSelectFec_i || null)+'&fec_f='+(valorSelectFec_f || null))
+        //fetch('/plan/filtro?car='+(valorSelectCartera || null)+'&fec_i='+(valorSelectFec_i || null)+'&fec_f='+(valorSelectFec_f || null))
         .then(res=>res.json())
             .then(res=>{
                 cargandoFiltro.style.display = 'none';
@@ -62,7 +63,7 @@ function selectBuscar(){
                                         <th ></th>
                                     </tr>                                   
                                 </thead>
-                                <tbody class="text-center" style="font-size:12px;">`
+                                <tbody class="text-center" style="font-size:12px;" id="paginas">`
                 res.forEach((el)=>{
                     htmlTable+=     `<tr>
                                         <td>${el.fecha_i}</td>
@@ -84,7 +85,15 @@ function selectBuscar(){
                                 
                     </table>`;
 
-            contenedorTabla.innerHTML = htmlTable;
+                contenedorTabla.innerHTML = htmlTable;
+                /*$(document).ready(function() {
+                    $('#paginas').pageMe({
+                    pagerSelector: '#developer_page',
+                    showPrevNext: true,
+                    hidePageNumbers: false,
+                    perPage: 3
+                    });
+                });*/
             })
     }
 }
@@ -96,8 +105,8 @@ function mostrarDetalle(id){
     const contenedorCantidad = document.getElementById('contenedor-cantidad');
     const contenedorFecha = document.getElementById('contenedor-fecha');
     
-    //fetch('/indicadores/public/plan/mostrar_detalle?id='+id)
-    fetch('/plan/mostrar_detalle?id='+id)
+    fetch('/indicadores/public/plan/mostrar_detalle?id='+id)
+    //fetch('/plan/mostrar_detalle?id='+id)
     .then(res=>res.json())
         .then(res=>{
             cargandoDetalle.style.display = 'none';
@@ -158,11 +167,11 @@ function mostrarDetalle(id){
                         `
             contenedorDetalle.innerHTML = htmlDetalle;
             let htmlCant=``;
-            htmlCant=`<p>${res[0].cant_clientes} Clientes</p>`
+            htmlCant=`<b style="font-size:16px;">${res[0].cant_clientes} CLIENTES</b>`
             contenedorCantidad.innerHTML = htmlCant;
 
             let htmlfecha=``;
-            htmlfecha=`<p>${res[0].fecha_i}</p>`
+            htmlfecha=`<b style="font-size:16px;">${res[0].fecha_i}</b>`
             contenedorFecha.innerHTML = htmlfecha;
 
             $('#modalDetalle').modal('show');
@@ -183,15 +192,15 @@ function mostrarResultado(id,car,cant){
     const contenedorCantidadR = document.getElementById('contenedor-cantidad-r');
     const contenedorFechaR = document.getElementById('contenedor-fecha-r');
 
-    //fetch('/indicadores/public/plan/mostrar_resultado?id='+id+'&car='+car)
-    fetch('/plan/mostrar_resultado?id='+id+'&car='+car)
+    fetch('/indicadores/public/plan/mostrar_resultado?id='+id+'&car='+car)
+    //fetch('/plan/mostrar_resultado?id='+id+'&car='+car)
     .then(res=>res.json())
         .then(res=>{
             cargandoResultado.style.display = 'none';
             let cobertura=res.cobertura;
             console.log(cobertura);
             let porcentajeCobertura = Math.round((parseInt(cobertura[0].can_clientes)/parseInt(cantidadTotal))*100);
-            let porcentajeIntensidad = Math.round10((parseInt(cobertura[0].cant_gestiones)/parseInt(cantidadTotal)),-1);
+            let porcentajeIntensidad = Math.round10((parseInt(cobertura[0].cant_gestiones)/parseInt(cobertura[0].can_clientes)),-1);
             console.log(porcentajeIntensidad);
             
             let contacto=res.contacto;
@@ -205,6 +214,10 @@ function mostrarResultado(id,car,cant){
 
             let usuario=res.usuario;
             console.log(usuario);
+
+            let negocio=res.negocio;
+            console.log(negocio);
+            let porcentajeNegocio = Math.round((parseInt(negocio[0].can_clientes)/parseInt(cantidadTotal))*100);
             /*let UsuarioCod=[];
             usuario.forEach((u)=>{
                 UsuarioCod=u.emp_cod;
@@ -216,7 +229,7 @@ function mostrarResultado(id,car,cant){
             let htmlResul=``;
             htmlResul=`
                         <table class="table table-center table-md table-striped table-hover pre-wrap table-responsive-lg" style="font-size:12px">
-                                    <tbody class="text-left text-dark">
+                                    <tbody class="text-left text-dark" style="font-size:14px !important;">
                                         <tr>
                                             <th scope="row">Cobertura:</th>
                                             <td>${porcentajeCobertura>0? porcentajeCobertura:'0'}%</td>
@@ -227,27 +240,31 @@ function mostrarResultado(id,car,cant){
                                         </tr>
                                         <tr>
                                             <th scope="row">PDPS:</th>
-                                            <td>${pdp[0].monto_pdp>0? formatoNumero(pdp[0].can_pdp)+"; S/."+formatoMoneda(pdp[0].monto_pdp):'0'}</td>
+                                            <td>${pdp[0].monto_pdp>0? formatoNumero(pdp[0].can_pdp)+"; S/."+formatoMoneda(pdp[0].monto_pdp):'0 ; S/.0'}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Confirmaciones:</th>
-                                            <td>${conf[0].monto_conf>0? formatoNumero(conf[0].can_conf)+"; S/."+formatoMoneda(conf[0].monto_conf):'0'}</td>
+                                            <td>${conf[0].monto_conf>0? formatoNumero(conf[0].can_conf)+"; S/."+formatoMoneda(conf[0].monto_conf):'0 ; S/.0'}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Intensidad:</th>
                                             <td>${porcentajeIntensidad>0? porcentajeIntensidad:'0'}</td>
                                         </tr>
                                         <tr>
+                                            <th scope="row">En Negociación:</th>
+                                            <td>${negocio[0].can_mot_np>0? negocio[0].can_mot_np>0+";"+porcentajeNegocio+"%":'0 ; 0%'}</td>
+                                        </tr>
+                                        <tr>
                                             <th style="vertical-align: middle;">Usuarios:</th>
-                                            <td style="fonts-size:10px !important;">`
+                                            <td>`
                 usuario.forEach((el)=>{
-                        htmlResul+=             `<a class="btn text-dark" role="button" 
+                        htmlResul+=`<a class="btn btn-xs text-dark" role="button" 
                                                     data-toggle="modal" data-target="#modalUsuario"
                                                     onclick="mostrarUsuario(${el.emp_cod},${id},${car},${el.cantidad})">
-                                                    ${el.emp_cod}
+                                                    <p><b>${el.emp_cod}</b></p>
                                                 </a>`
                 })
-                htmlResul+=                 `</td>
+                htmlResul+=`</td>
                                         </tr>
                                     </tbody>
                         </table>
@@ -255,7 +272,7 @@ function mostrarResultado(id,car,cant){
                 contenedorResultado.innerHTML = htmlResul;
  
                 let htmlCantR=``;
-                htmlCantR=`<p class="text-left">${cantidadTotal} Clientes</p>`
+                htmlCantR=`<b style="font-size:16px;">${cantidadTotal} CLIENTES</b>`
                 contenedorCantidadR.innerHTML = htmlCantR;
 
                 /*let htmlfecha=``;
@@ -297,8 +314,8 @@ function mostrarUsuario(cod,id,car,cant){
     const contenedorCantidadU = document.getElementById('contenedor-cantidad-u');
     const contenedorFechaU = document.getElementById('contenedor-fecha-u');
     
-    //fetch('/indicadores/public/plan/mostrar_usuario?id='+id+'&car='+car+'&cod='+cod)
-    fetch('/plan/mostrar_usuario?id='+id+'&car='+car+'&cod='+cod)
+    fetch('/indicadores/public/plan/mostrar_usuario?id='+id+'&car='+car+'&cod='+cod)
+    //fetch('/plan/mostrar_usuario?id='+id+'&car='+car+'&cod='+cod)
     .then(res=>res.json())
         .then(res=>{
             cargandoUsuario.style.display = 'none';
@@ -317,6 +334,10 @@ function mostrarUsuario(cod,id,car,cant){
             let conf=res.conf;
             console.log(conf);
 
+            let negocio=res.negocio;
+            console.log(negocio);
+            let porcentajeNegocio = Math.round((parseInt(negocio[0].can_clientes)/parseInt(cantidadTotal))*100);
+
             let htmlUsu=``;
             htmlUsu=`
                         <table class="table table-center table-sm table-striped table-hover pre-wrap table-responsive-lg" style="font-size:12px">
@@ -331,26 +352,30 @@ function mostrarUsuario(cod,id,car,cant){
                                         </tr>
                                         <tr>
                                             <th scope="row">PDPS:</th>
-                                            <td>${pdp[0].monto_pdp>0? formatoNumero(pdp[0].can_pdp)+"; S/."+formatoMoneda(pdp[0].monto_pdp):'0'}</td>
+                                            <td>${pdp[0].monto_pdp>0? formatoNumero(pdp[0].can_pdp)+"; S/."+formatoMoneda(pdp[0].monto_pdp):'0 ; S/.0'}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Confirmaciones:</th>
-                                            <td>${conf[0].monto_conf>0? formatoNumero(conf[0].can_conf)+"; S/."+formatoMoneda(conf[0].monto_conf):'0'}</td>
+                                            <td>${conf[0].monto_conf>0? formatoNumero(conf[0].can_conf)+"; S/."+formatoMoneda(conf[0].monto_conf):'0 ; S/.0'}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Intensidad:</th>
                                             <td>${porcentajeIntensidad>0? porcentajeIntensidad:'0'}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">En Negociación:</th>
+                                            <td>${negocio[0].can_mot_np>0? negocio[0].can_mot_np>0+";"+porcentajeNegocio+"%":'0 ; 0%'}</td>
                                         </tr>
                                     </tbody>
                         </table>
                         `
                 contenedorUsuario.innerHTML = htmlUsu;
                 let htmlCant=``;
-                htmlCant=`<p class="text-left">${cantidadTotal} Clientes</p>`
+                htmlCant=`<b style="font-size:13px;">${cantidadTotal} Clientes</b>`
                 contenedorCantidadU.innerHTML = htmlCant;
 
                 let htmlCod=``;
-                htmlCod=`U:${codigo}`
+                htmlCod=`<b style="font-size:13px;">U: ${codigo}</b>`
                 contenedorCodigo.innerHTML = htmlCod;
                 /*$(document).ready(function(){
                     $('[data-toggle="popover"]').popover({ html : true });

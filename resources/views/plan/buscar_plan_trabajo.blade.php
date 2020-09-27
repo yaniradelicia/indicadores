@@ -25,7 +25,7 @@ Indicadores
             <!--fin navbar -->
             <div class="card mb-2">
                 <div class="card-header">
-                    <h3>Plan de Trabajo</h3>
+                    <h3>Buscar Plan de Trabajo</h3>
                 </div>
                 <!-- body card -->
                 <div class="card-body">
@@ -64,6 +64,9 @@ Indicadores
                             <div class="col-xs-12 col-md-12 col-lg-12" id="tabla">
                             </div>
                         </div>
+                        <div class="col-xs-12 col-md-12 col-lg-12 row justify-content-center text-center">
+                            <ul class="pagination pagination-lg pager" id="developer_page"></ul>
+                        </div>
                     </div>
 
                     <!-- Modal RESUMEN-->
@@ -71,28 +74,23 @@ Indicadores
                     <div class="modal fade bd-example-modal-lg" id="modalDetalle" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Detalle</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <div class="modal-header cab-camp">
+                                        <h5 class="modal-title" id="exampleModalLabel"><b>DETALLE</b></h5>
+                                        <button type="button" style="color: #fff;" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                    <div class="modal-body text-center">
-                                        <div class="spinner-border text-success" id="cargando-detalle" style="display:none;"></div>
+                                    <div class="modal-body text-center row justify-content-center">
+                                        <div class="spinner-border text-info" id="cargando-detalle" style="display:none;"></div>
                                         <div class="col-xs-12 col-md-12 col-lg-12 row justify-content-center">
-                                            <div id="contenedor-detalle" class="row justify-content-center cont-body px-0 mx-0">
+                                            <div id="contenedor-detalle" class="row justify-content-center px-0 mx-0 cont-body">
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal-footer"> <!--excel pu-->
-                                        <div class="form-group row align-items-start">
-                                            <div id="contenedor-cantidad" class="cont-body">
-                                            </div>
+                                    <div class="modal-footer cab-camp row justify-content-between px-0 mx-0"> <!--excel pu-->
+                                        <div id="contenedor-cantidad" class="col-md-5 cont-body">
                                         </div>
-                                        
-                                        <div class="form-group row align-items-end">
-                                            <div id="contenedor-fecha" class="cont-body">
-                                            </div>
+                                        <div id="contenedor-fecha" class="col-md-5 text-right cont-body">
                                         </div>
                                     </div>
                                 </div>
@@ -107,28 +105,24 @@ Indicadores
                     <div class="modal fade bd-example-modal-lg" id="modalResultado" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Resultado</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <div class="modal-header cab-camp">
+                                        <h5 class="modal-title" id="exampleModalLabel"><b>RESULTADO<b></h5>
+                                        <button type="button" style="color: #fff;" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                    <div class="modal-body text-center">
-                                        <div class="spinner-border text-success" id="cargando-resultado" style="display:none;"></div>
+                                    <div class="modal-body text-center row justify-content-center">
+                                        <div class="spinner-border text-info" id="cargando-resultado" style="display:none;"></div>
                                         <div class="col-xs-12 col-md-12 col-lg-12 row justify-content-center">
                                             <div id="contenedor-resultado" class="row justify-content-center cont-body-r">
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal-footer"> <!--excel pu-->
-                                        
-                                            <div class="form-group row justify-content-between">
-                                                <div id="contenedor-cantidad-r" class="cont-body-r ml-0 pl-0">
-                                                </div>
-                                                <div id="contenedor-fecha-r ml-5 pl-5" class="cont-body-r">
-                                                </div>
-                                            </div>
-                                        
+                                    <div class="modal-footer cab-camp row justify-content-between px-0 mx-0"> <!--excel pu-->
+                                        <div id="contenedor-cantidad-r" class="col-md-5 cont-body-r">
+                                        </div>
+                                        <div id="contenedor-fecha-r ml-5 pl-5" class="col-md-5 cont-body-r">
+                                        </div>  
                                     </div>
                                 </div>
                             </div>
@@ -140,32 +134,24 @@ Indicadores
                         <div class="modal fade bd-example-modal-sm" id="modalUsuario" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-sm" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        
-                                            
-                                            <h5 id="contenedor-codigo" class="cont-body-u">
-                                            </h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <div class="modal-header cab-camp">
+                                        <h5 id="contenedor-codigo" class="cont-body-u"></h5>
+                                        <button type="button" style="color: #fff;" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        
+                                        </button>
                                     </div>
-                                    <div class="modal-body text-center">
-                                        <div class="spinner-border text-success" id="cargando-usuario" style="display:none;"></div>
+                                    <div class="modal-body text-center row justify-content-center">
+                                        <div class="spinner-border text-info" id="cargando-usuario" style="display:none;"></div>
                                         <div class="col-xs-12 col-md-12 col-lg-12 row justify-content-center">
-                                            <div id="contenedor-usuario" class="row justify-content-center cont-body-u px-0 mx-0">
+                                            <div id="contenedor-usuario" class="row justify-content-center px-0 mx-0 cont-body-u">
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal-footer"> <!--excel pu-->
-                                        
-                                        <div class="form-group row justify-content-between">
-                                                <div id="contenedor-cantidad-u" class="cont-body-u">
-                                                </div>
-                                                <div id="contenedor-fecha-u" class="cont-body-u">
-                                                </div>
+                                    <div class="modal-footer cab-camp row justify-content-between px-0 mx-0"> <!--excel pu-->
+                                        <div id="contenedor-cantidad-u" class="col-md-5 cont-body-u">
                                         </div>
-                                        
+                                        <div id="contenedor-fecha-u" class="col-md-5 cont-body-u">
+                                        </div>   
                                     </div>
                                 </div>
                             </div>
