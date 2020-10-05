@@ -39,6 +39,7 @@ const selectEstructura = document.getElementById('estructura')
 const selectGestion = document.getElementById('gestion')
 const selectInicio = document.getElementById('inicio')
 const selectFin = document.getElementById('fin')
+const cargando= document.getElementById('cargando')
 
 //const para mostrar info pagos
 const contenedorGestion = document.getElementById('tabla-gestion');
@@ -56,6 +57,7 @@ selectFin.addEventListener('change',()=>{indicadoresGestion()});*/
 
 function indicadoresGestion(){
     if(pieChart!=null) pieChart.destroy();
+    contenedorGestion.innerHTML = '';
     const valorSelectCartera = selectCartera.options[selectCartera.selectedIndex].value;
     const valorSelectEstructura = selectEstructura.options[selectEstructura.selectedIndex].value;
     const valorSelectGestion = selectGestion.options[selectGestion.selectedIndex].value;
@@ -220,7 +222,7 @@ function indicadoresGestion(){
                     totales.clientes += el.clientes? parseInt(el.clientes):parseInt(el.cant_clientes);
                     totales.capital  += el.capital? parseFloat(el.capital):parseFloat(el.total_capital);
                     totales.deuda    += el.deuda? parseFloat(el.deuda):parseFloat(el.total_deuda);
-                    totales.importe  += el.importe? parseFloat(el.importe):parseFloat(el.total_importe);
+                    totales.importe  += el.importe>=0? parseFloat(el.importe):parseFloat(el.total_importe);
                     totales.cantidad += parseInt(el.cantidad);
                     totales.monto  += parseFloat(el.monto);
 
@@ -231,7 +233,7 @@ function indicadoresGestion(){
                                         <td>${el.clientes? el.clientes:el.cant_clientes}</td>
                                         <td>${formatoMoneda(el.capital? el.capital:el.total_capital) }</td>
                                         <td>${formatoMoneda(el.deuda? el.deuda:el.total_deuda)}</td>
-                                        <td>${formatoMoneda(el.importe? el.importe:el.total_importe)}</td>
+                                        <td>${formatoMoneda(el.importe>=0? el.importe:el.total_importe)}</td>
                                         <td>${el.cantidad}</td>
                                         <td>${formatoMoneda(el.monto)}</td>
                                     </tr>`
@@ -242,7 +244,7 @@ function indicadoresGestion(){
                                         <td>${el.clientes? el.clientes:el.cant_clientes}</td>
                                         <td>${formatoMoneda(el.capital? el.capital:el.total_capital) }</td>
                                         <td>${formatoMoneda(el.deuda? el.deuda:el.total_deuda)}</td>
-                                        <td>${formatoMoneda(el.importe? el.importe:el.total_importe)}</td>
+                                        <td>${formatoMoneda(el.importe>=0? el.importe:el.total_importe)}</td>
                                     </tr>`
                     }
                 }) 
@@ -495,7 +497,7 @@ function indicadoresGestion(){
                                             dy = centery + lradius * Math.sin(langle),
                                             //val = (dataset.data[idx] / total)*100;
                                             val = Math.round(dataset.data[idx] / total * 100);
-                                            console.log(val);
+                                            //console.log(val);
                                         ctx.fillText(val + '%', dx, dy);
                                     //}
                                 }
@@ -524,10 +526,12 @@ function indicadoresGestion(){
             }else{
                 url = 'buscarc_ubic/'+valorSelectCartera+'/'+valorSelectInicio+'/'+valorSelectFin
             }
+            cargando.style.display = '';
 
             fetch(url)
             .then(res=>res.json())
             .then(res=>{
+                cargando.style.display = 'none';
                 if(pieChart!=null) pieChart.destroy();
                 let totalCantidades = 0;          
                 if(valorSelectGestion == 'gestion') totalCantidades = calcularTotal(res,'cant_gestion');

@@ -37,6 +37,9 @@
                     <li class="nav-item">
                         <a class="nav-link text-white" href="{{route("crear_plan")}}">PLAN DE TRABAJO</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route("indicador_gestor")}}">GESTORES</a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         ADMINISTRADOR

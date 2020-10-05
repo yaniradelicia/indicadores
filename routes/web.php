@@ -117,6 +117,17 @@ Route::group(['middleware' => ['auth']], function(){
     Route::get('/plan/mostrar_detalle', 'PlanController@mostrarDetalle');
     Route::get('/plan/mostrar_resultado', 'PlanController@mostrarResultado');
     Route::get('/plan/mostrar_usuario', 'PlanController@mostrarUsuario');
+
+    //vistas indicador gestor
+    Route::get('gestor/buscar_indicador', 'IndicadorGestorController@index')->name('indicador_gestor');
+    Route::get('gestor/carga_gestores/{car}', 'IndicadorGestorController@cargarGestores');
+    Route::get('gestor/carga_gestores_total', 'IndicadorGestorController@cargarGestoresTotal');
+    Route::get('gestor/buscargestor_g/{car}/{firma}/{tip}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorGestiones');
+    Route::get('gestor/buscargestor_pdp/{car}/{firma}/{tip}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorPDPS');
+    Route::get('gestor/buscargestor_conf/{car}/{firma}/{tip}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorCONF');
+    Route::get('gestor/buscargestor_ubic/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbic');
+    Route::get('gestor/buscargestor_ubic_pdp/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbicPDPS');
+    Route::get('gestor/buscargestor_ubic_conf/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbicCONF');
 });
 
 

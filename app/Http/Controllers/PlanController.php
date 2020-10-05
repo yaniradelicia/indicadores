@@ -68,7 +68,7 @@ class PlanController extends Controller
             $fecha_f=$q->fecha_f;
         }
 
-        $sqlCobertura="
+        /*$sqlCobertura="
             SELECT 
             if(cant_gestiones is null,0,cant_gestiones) as cant_gestiones,
             if(can_clientes is null,0,can_clientes) as can_clientes
@@ -98,9 +98,9 @@ class PlanController extends Controller
                     ) t
             )tt
         ";
-        $cobertura=DB::select(DB::raw($sqlCobertura));
+        $cobertura=DB::select(DB::raw($sqlCobertura));*/
 
-        $sqlContacto="
+        /*$sqlContacto="
             select 
             if(sum(cli) is null,0,sum(cli)) as can_clientes
             from
@@ -124,9 +124,9 @@ class PlanController extends Controller
             ) t
                 
         ";
-        $contacto=DB::select(DB::raw($sqlContacto));
+        $contacto=DB::select(DB::raw($sqlContacto));*/
 
-        $sqlPdp="
+        /*$sqlPdp="
             select 
             if(cli_cod,count(cli_cod),0)  as can_clientes, 
             if(monto,sum(monto),0) as monto_pdp,
@@ -145,9 +145,9 @@ class PlanController extends Controller
                 group By cli_cod
                 ) t					
         ";
-        $pdp=DB::select(DB::raw($sqlPdp));
+        $pdp=DB::select(DB::raw($sqlPdp));*/
 
-        $sqlConf="
+        /*$sqlConf="
             select 
             if(cli_cod,count(cli_cod),0)  as can_clientes, 
             if(monto,sum(monto),0) as monto_conf,
@@ -166,7 +166,7 @@ class PlanController extends Controller
                 group By cli_cod
                 ) t				
         ";
-        $conf=DB::select(DB::raw($sqlConf));
+        $conf=DB::select(DB::raw($sqlConf));*/
 
         $sqlUsuario="
             SELECT emp_cod,emp_nom,count(cli_cod) as cantidad
@@ -186,7 +186,7 @@ class PlanController extends Controller
         ";
         $usuario=DB::select(DB::raw($sqlUsuario));
 
-        $sqlneg="
+        /*$sqlneg="
             select 
             if(cli_cod,count(cli_cod),0)  as can_clientes, 
             if(motivo_np,count(motivo_np),0) as can_mot_np
@@ -203,9 +203,44 @@ class PlanController extends Controller
             group By cli_cod
             ) tt
         ";
-        $negocio=DB::select(DB::raw($sqlneg));
+        $negocio=DB::select(DB::raw($sqlneg));*/
 
-        return response()->json(['cobertura' => $cobertura,'contacto' => $contacto,'pdp' => $pdp, 'conf' => $conf, 'usuario' => $usuario,'negocio' => $negocio]);
+        $slqmontos="
+                SELECT
+                sum(pdp) as can_pdp,
+                sum(monto_pdp) as monto_pdp,
+                sum(conf) as can_conf,
+                sum(monto_conf)as monto_conf,
+                sum(mot_np) as can_mot_np,
+                if(cliente,count(DISTINCT cliente),0) as can_clientes,
+                sum(gestiones) as cant_gestiones,
+                count(DISTINCT contacto) as can_contacto
+                FROM 
+                (SELECT
+                if(gg.res_id_FK in (2,37,33,10,1,8,43,39,7,3,5,9,34,17,21,18,28,30,35,36,46,47,48,49)
+                AND (date_format(gg.ges_cli_fec,'%Y-%m-%d') between '$fecha_i' and '$fecha_f'),cli_cod,null) as contacto,
+                    if(ges_cli_tel_id_FK,1,0) as gestiones,
+                    cli_cod as cliente,
+                    if(g.res_id_FK in (1,43),1,0) as pdp,
+                    if(g.res_id_FK in (1,43),g.ges_cli_com_can,0) as monto_pdp,
+                    if(g.res_id_FK in (2),1,0) as conf,
+                    if(g.res_id_FK in (2),g.ges_cli_conf_can,0) as monto_conf,
+                    if(g.mot_id_FK in (3),1,0) as mot_np
+                    FROM
+                        gestion_cliente as g
+                    inner JOIN cliente as c ON g.cli_id_FK=c.cli_id
+                    inner JOIN gestion_cliente gg ON c.ges_cli_tel_id_FK=gg.ges_cli_id
+                    WHERE
+                    c.car_id_FK=$car
+                    and cli_est=0
+                    and cli_pas=0
+                    AND (date_format(g.ges_cli_fec,'%Y-%m-%d') between '$fecha_i' and '$fecha_f')
+                    and cli_cod in ($cadena)
+                ) t
+        ";
+        $montos=DB::select(DB::raw($slqmontos));
+
+        return response()->json(['usuario' => $usuario,'montos' => $montos]);
     }
 
     public function mostrarUsuario(Request $request)
@@ -228,7 +263,7 @@ class PlanController extends Controller
             $fecha_f=$q->fecha_f;
         }
 
-        $sqlCobertura="
+        /*$sqlCobertura="
             SELECT 
             if(cant_gestiones is null,0,cant_gestiones) as cant_gestiones,
             if(can_clientes is null,0,can_clientes) as can_clientes
@@ -260,9 +295,9 @@ class PlanController extends Controller
                     ) t
             )tt
         ";
-        $cobertura=DB::select(DB::raw($sqlCobertura));
+        $cobertura=DB::select(DB::raw($sqlCobertura));*/
 
-        $sqlContacto="
+        /*$sqlContacto="
             select 
             if(sum(cli) is null,0,sum(cli)) as can_clientes
             from
@@ -288,9 +323,9 @@ class PlanController extends Controller
             ) t
                 
         ";
-        $contacto=DB::select(DB::raw($sqlContacto));
+        $contacto=DB::select(DB::raw($sqlContacto));*/
 
-        $sqlPdp="
+        /*$sqlPdp="
             select 
             if(cli_cod,count(cli_cod),0)  as can_clientes, 
             if(monto,sum(monto),0) as monto_pdp,
@@ -354,11 +389,48 @@ class PlanController extends Controller
             group By cli_cod
             ) tt
         ";
-        $negocio=DB::select(DB::raw($sqlneg));
+        $negocio=DB::select(DB::raw($sqlneg));*/
+
+        $slqmontos="
+                SELECT
+                sum(pdp) as can_pdp,
+                sum(monto_pdp) as monto_pdp,
+                sum(conf) as can_conf,
+                sum(monto_conf)as monto_conf,
+                sum(mot_np) as can_mot_np,
+                if(cliente,count(DISTINCT cliente),0) as can_clientes,
+                sum(gestiones) as cant_gestiones,
+                count(DISTINCT contacto) as can_contacto
+                FROM 
+                (SELECT
+                    if(gg.res_id_FK in (2,37,33,10,1,8,43,39,7,3,5,9,34,17,21,18,28,30,35,36,46,47,48,49)
+                    AND (date_format(gg.ges_cli_fec,'%Y-%m-%d') between '$fecha_i' and '$fecha_f'),cli_cod,null) as contacto,
+                    if(ges_cli_tel_id_FK,1,0) as gestiones,
+                    cli_cod as cliente,
+                    if(g.res_id_FK in (1,43),1,0) as pdp,
+                    if(g.res_id_FK in (1,43),g.ges_cli_com_can,0) as monto_pdp,
+                    if(g.res_id_FK in (2),1,0) as conf,
+                    if(g.res_id_FK in (2),g.ges_cli_conf_can,0) as monto_conf,
+                    if(g.mot_id_FK in (3),1,0) as mot_np
+                    FROM
+                        gestion_cliente as g
+                    inner JOIN cliente as c ON g.cli_id_FK=c.cli_id
+                    inner JOIN gestion_cliente gg ON c.ges_cli_tel_id_FK=gg.ges_cli_id
+                    INNER JOIN creditoy_cobranzas.empleado as e ON c.emp_tel_id_FK=e.emp_id
+                    WHERE
+                    c.car_id_FK=$car
+                    AND emp_cod=$cod
+                    and cli_est=0
+                    and cli_pas=0
+                    AND (date_format(g.ges_cli_fec,'%Y-%m-%d') between '$fecha_i' and '$fecha_f')
+                    and cli_cod in ($cadena)
+                ) t
+        ";
+        $montos=DB::select(DB::raw($slqmontos));
 
 
 
-        return response()->json(['cobertura' => $cobertura,'contacto' => $contacto,'pdp' => $pdp, 'conf' => $conf,'negocio' => $negocio]);
+        return response()->json(['montos' => $montos]);
 
     }
 

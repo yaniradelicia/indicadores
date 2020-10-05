@@ -197,27 +197,27 @@ function mostrarResultado(id,car,cant){
     .then(res=>res.json())
         .then(res=>{
             cargandoResultado.style.display = 'none';
-            let cobertura=res.cobertura;
-            console.log(cobertura);
-            let porcentajeCobertura = Math.round((parseInt(cobertura[0].can_clientes)/parseInt(cantidadTotal))*100);
-            let porcentajeIntensidad = Math.round10((parseInt(cobertura[0].cant_gestiones)/parseInt(cobertura[0].can_clientes)),-1);
+            /*let cobertura=res.cobertura;
+            console.log(cobertura);*/
+            let montos=res.montos;
+            console.log(montos);
+            let porcentajeCobertura = Math.round((parseInt(montos[0].can_clientes)/parseInt(cantidadTotal))*100);
+            let porcentajeIntensidad = Math.round10((parseInt(montos[0].cant_gestiones)/parseInt(montos[0].can_clientes)),-1);
             console.log(porcentajeIntensidad);
             
-            let contacto=res.contacto;
-            console.log(contacto);
-            let porcentajeContacto = Math.round((parseInt(contacto[0].can_clientes)/parseInt(cantidadTotal))*100);
+            /*let contacto=res.contacto;
+            console.log(contacto);*/
+            let porcentajeContacto = Math.round((parseInt(montos[0].can_contacto)/parseInt(cantidadTotal))*100);
 
-            let pdp=res.pdp;
+            /*let pdp=res.pdp;
             console.log(pdp);
             let conf=res.conf;
-            console.log(conf);
+            console.log(conf);*/
 
             let usuario=res.usuario;
             console.log(usuario);
 
-            let negocio=res.negocio;
-            console.log(negocio);
-            let porcentajeNegocio = Math.round((parseInt(negocio[0].can_clientes)/parseInt(cantidadTotal))*100);
+            let porcentajeNegocio = Math.round((parseInt(montos[0].can_mot_np)/parseInt(cantidadTotal))*100);
             /*let UsuarioCod=[];
             usuario.forEach((u)=>{
                 UsuarioCod=u.emp_cod;
@@ -240,11 +240,11 @@ function mostrarResultado(id,car,cant){
                                         </tr>
                                         <tr>
                                             <th scope="row">PDPS:</th>
-                                            <td>${pdp[0].monto_pdp>0? formatoNumero(pdp[0].can_pdp)+"; S/."+formatoMoneda(pdp[0].monto_pdp):'0 ; S/.0'}</td>
+                                            <td>${montos[0].monto_pdp>0? formatoNumero(montos[0].can_pdp)+"; S/."+formatoMoneda(montos[0].monto_pdp):'0 ; S/.0'}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Confirmaciones:</th>
-                                            <td>${conf[0].monto_conf>0? formatoNumero(conf[0].can_conf)+"; S/."+formatoMoneda(conf[0].monto_conf):'0 ; S/.0'}</td>
+                                            <td>${montos[0].monto_conf>0? formatoNumero(montos[0].can_conf)+"; S/."+formatoMoneda(montos[0].monto_conf):'0 ; S/.0'}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Intensidad:</th>
@@ -252,7 +252,7 @@ function mostrarResultado(id,car,cant){
                                         </tr>
                                         <tr>
                                             <th scope="row">En Negociación:</th>
-                                            <td>${negocio[0].can_mot_np>0? negocio[0].can_mot_np>0+";"+porcentajeNegocio+"%":'0 ; 0%'}</td>
+                                            <td>${montos[0].can_mot_np>0? montos[0].can_mot_np+";"+porcentajeNegocio+"%":'0 ; 0%'}</td>
                                         </tr>
                                         <tr>
                                             <th style="vertical-align: middle;">Usuarios:</th>
@@ -319,24 +319,25 @@ function mostrarUsuario(cod,id,car,cant){
     .then(res=>res.json())
         .then(res=>{
             cargandoUsuario.style.display = 'none';
-            let cobertura=res.cobertura;
-            console.log(cobertura);
-            let porcentajeCobertura = Math.round((parseInt(cobertura[0].can_clientes)/parseInt(cantidadTotal))*100);
-            let porcentajeIntensidad = Math.round10((parseInt(cobertura[0].cant_gestiones)/parseInt(cobertura[0].can_clientes)),-1);
-            console.log(porcentajeIntensidad);
+            //let cobertura=res.cobertura;
+            let montos=res.montos;
+            console.log(montos);
+            let porcentajeCobertura = Math.round((parseInt(montos[0].can_clientes)/parseInt(cantidadTotal))*100);
+            let porcentajeIntensidad = Math.round10((parseInt(montos[0].cant_gestiones)/parseInt(montos[0].can_clientes)),-1);
+            //console.log(porcentajeIntensidad);
             
-            let contacto=res.contacto;
-            console.log(contacto);
-            let porcentajeContacto = Math.round((parseInt(contacto[0].can_clientes)/parseInt(cantidadTotal))*100);
+            //let contacto=res.contacto;
+            //console.log(contacto);
+            let porcentajeContacto = Math.round((parseInt(montos[0].can_contacto)/parseInt(cantidadTotal))*100);
 
-            let pdp=res.pdp;
+            /*let pdp=res.pdp;
             console.log(pdp);
             let conf=res.conf;
-            console.log(conf);
+            console.log(conf);*/
 
-            let negocio=res.negocio;
-            console.log(negocio);
-            let porcentajeNegocio = Math.round((parseInt(negocio[0].can_clientes)/parseInt(cantidadTotal))*100);
+            //let montos=res.montos;
+            //console.log(montos);
+            let porcentajeNegocio = Math.round((parseInt(montos[0].can_clientes)/parseInt(cantidadTotal))*100);
 
             let htmlUsu=``;
             htmlUsu=`
@@ -352,11 +353,11 @@ function mostrarUsuario(cod,id,car,cant){
                                         </tr>
                                         <tr>
                                             <th scope="row">PDPS:</th>
-                                            <td>${pdp[0].monto_pdp>0? formatoNumero(pdp[0].can_pdp)+"; S/."+formatoMoneda(pdp[0].monto_pdp):'0 ; S/.0'}</td>
+                                            <td>${montos[0].monto_pdp>0? formatoNumero(montos[0].can_pdp)+"; S/."+formatoMoneda(montos[0].monto_pdp):'0 ; S/.0'}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Confirmaciones:</th>
-                                            <td>${conf[0].monto_conf>0? formatoNumero(conf[0].can_conf)+"; S/."+formatoMoneda(conf[0].monto_conf):'0 ; S/.0'}</td>
+                                            <td>${montos[0].monto_conf>0? formatoNumero(montos[0].can_conf)+"; S/."+formatoMoneda(montos[0].monto_conf):'0 ; S/.0'}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Intensidad:</th>
@@ -364,7 +365,7 @@ function mostrarUsuario(cod,id,car,cant){
                                         </tr>
                                         <tr>
                                             <th scope="row">En Negociación:</th>
-                                            <td>${negocio[0].can_mot_np>0? negocio[0].can_mot_np>0+";"+porcentajeNegocio+"%":'0 ; 0%'}</td>
+                                            <td>${montos[0].can_mot_np>0? montos[0].can_mot_np+";"+porcentajeNegocio+"%":'0 ; 0%'}</td>
                                         </tr>
                                     </tbody>
                         </table>

@@ -176,14 +176,14 @@ function indicadoresGestion(){
             totales.clientes += parseInt(el.cantidad);
             totales.capital  += el.capital? parseFloat(el.capital):parseFloat(el.total_capital);
             totales.deuda    += el.deuda? parseFloat(el.deuda):parseFloat(el.total_deuda);
-            totales.importe  += el.importe? parseFloat(el.importe):parseFloat(el.total_importe);
+            totales.importe  += el.importe>=0? parseFloat(el.importe):parseFloat(el.total_importe);
             html += 
                                 `<tr>
                                     <th scope="row">${el.tipo}</th>
                                     <td>${el.cantidad}</td>
                                     <td>${formatoMoneda(el.capital? el.capital:el.total_capital )}</td>
                                     <td>${formatoMoneda(el.deuda? el.deuda:el.total_deuda)}</td>
-                                    <td>${formatoMoneda(el.importe? el.importe:el.total_importe)}</td>
+                                    <td>${formatoMoneda(el.importe>=0? el.importe:el.total_importe)}</td>
                                 </tr>`
             })        
             html += 
