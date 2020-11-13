@@ -68,6 +68,7 @@ Route::group(['middleware' => ['auth']], function(){
     Route::get('reporte/buscarc_ubic/{car}/{fec_i}/{fec_f}', 'ReporteController@buscarCarteraUbic');
     Route::get('reporte/buscarc_ubic_pdp/{car}/{fec_i}/{fec_f}', 'ReporteController@buscarCarteraUbicPDP');
     Route::get('reporte/buscarc_ubic_con/{car}/{fec_i}/{fec_f}', 'ReporteController@buscarCarteraUbicCON');
+    Route::get('reporte/buscarc_ubic_pag/{car}/{fec_i}/{fec_f}', 'ReporteController@buscarCarteraUbicPagos');
 
     //Route::get('reporte/buscari', 'ReporteController@buscarIndicadores');
     //indicadores operativos
@@ -106,7 +107,7 @@ Route::group(['middleware' => ['auth']], function(){
     //vistas consolidado
     Route::get('reporte/consolidado', 'GestionController@index')->name('reporte_consolidado');
     Route::get('reporte/mostrar_consolidado', 'GestionController@repConsolidado');
-    Route::get('reporte/mostrar_consolidado_fecha', 'GestionController@repConsolidadoFecha');
+    Route::get('reporte/mostrar_consolidado_fecha/{fecha}', 'GestionController@repConsolidadoFecha');
 
     //vistas Plan de Trabajo
     Route::get('plan/crear_plan', 'PlanController@index')->name('crear_plan');
@@ -125,9 +126,19 @@ Route::group(['middleware' => ['auth']], function(){
     Route::get('gestor/buscargestor_g/{car}/{firma}/{tip}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorGestiones');
     Route::get('gestor/buscargestor_pdp/{car}/{firma}/{tip}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorPDPS');
     Route::get('gestor/buscargestor_conf/{car}/{firma}/{tip}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorCONF');
+    Route::get('gestor/buscargestor_pagos/{car}/{firma}/{tip}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorPagos');
     Route::get('gestor/buscargestor_ubic/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbic');
     Route::get('gestor/buscargestor_ubic_pdp/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbicPDPS');
     Route::get('gestor/buscargestor_ubic_conf/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbicCONF');
+
+
+    //asignacion de firmas
+    Route::get('asignacion/firmas', 'RegistroFirmasController@index');
+    Route::get('/asignacion/carga_carteras/{mes}', 'RegistroFirmasController@cargarCarteras');
+    Route::get('/asignacion/actualizado_automatico/{car}/{mes}', 'RegistroFirmasController@guardarAutomatico');
+    Route::get('/asignacion/carga_clientes_pagos/{car}/{mes}', 'RegistroFirmasController@cargaClientes');
+    Route::get('/asignacion/carga_cliente/{codigo}/{fecha}', 'RegistroFirmasController@cargaClienteCod');
+    Route::get('/asignacion/guardar_cliente/{car}/{cod}/{pago}/{fec}/{usuario}', 'RegistroFirmasController@GuardarCliente');
 });
 
 

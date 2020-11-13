@@ -114,6 +114,8 @@ function indicadoresGestor(){
                 url = 'buscargestor_pdp/'+valorSelectCartera+'/'+valorSelectGestor+'/'+valorSelectEstructura+'/'+valorSelectInicio+'/'+valorSelectFin;
             }else if(valorSelectAnalisis=='confirmacion'){
                 url = 'buscargestor_conf/'+valorSelectCartera+'/'+valorSelectGestor+'/'+valorSelectEstructura+'/'+valorSelectInicio+'/'+valorSelectFin;
+            }else if(valorSelectAnalisis=='pagos'){
+                url = 'buscargestor_pagos/'+valorSelectCartera+'/'+valorSelectGestor+'/'+valorSelectEstructura+'/'+valorSelectInicio+'/'+valorSelectFin;
             }else{
                 url = 'buscargestor_g/'+valorSelectCartera+'/'+valorSelectGestor+'/'+valorSelectEstructura+'/'+valorSelectInicio+'/'+valorSelectFin
             }
@@ -122,6 +124,8 @@ function indicadoresGestor(){
                 url = 'buscargestor_ubic_pdp/'+valorSelectCartera+'/'+valorSelectGestor+'/'+valorSelectInicio+'/'+valorSelectFin;
             }else if(valorSelectAnalisis=='confirmacion'){
                 url = 'buscargestor_ubic_conf/'+valorSelectCartera+'/'+valorSelectGestor+'/'+valorSelectInicio+'/'+valorSelectFin;
+            }else if(valorSelectAnalisis=='pagos'){
+                url = 'buscargestor_ubic_pagos/'+valorSelectCartera+'/'+valorSelectGestor+'/'+valorSelectInicio+'/'+valorSelectFin;
             }else{
                 url = 'buscargestor_ubic/'+valorSelectCartera+'/'+valorSelectGestor+'/'+valorSelectInicio+'/'+valorSelectFin
             }
@@ -130,7 +134,6 @@ function indicadoresGestor(){
             fetch(url)
             .then(res=>res.json())
             .then(res=>{
-
                 if(res.length>0){
                     console.log(res)
                     cargando.style.display = 'none';
@@ -177,6 +180,21 @@ function indicadoresGestor(){
                                             </tr>
                                         </thead>
                                         <tbody class="text-center">`
+                    }else if(valorSelectAnalisis=='pagos'){
+                        html = `<table class="table table-sm table-striped table-hover table-responsive-md">
+                                        <thead class="cab-camp text-center">
+                                            <tr>
+                                                <th scope="col">ESTRUCTURA</th>
+                                                <th scope="col">CLIENTES</th>
+                                                <th scope="col">CAPITAL</th>
+                                                <th scope="col">DEUDA</th>
+                                                <th scope="col">IC</th>
+                                                <th scope="col">CANT.PAGOS</th>
+                                                <th scope="col">MONTO PAGOS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-center">`
+
                     }else{
                         html = `<table class="table table-sm table-striped table-hover table-responsive-md">
                                         <thead class="cab-camp text-center">
@@ -200,7 +218,7 @@ function indicadoresGestor(){
                         totales.cantidad += el.cantidad? parseInt(el.cantidad):parseInt(el.cant_gestion);
                         totales.monto  += el.monto? parseFloat(el.monto):0;
 
-                        if(valorSelectAnalisis=='pdps' || valorSelectAnalisis=='confirmacion'){
+                        if(valorSelectAnalisis=='pdps' || valorSelectAnalisis=='confirmacion' || valorSelectAnalisis=='pagos'){
                             html +=
                                         `<tr>
                                             <th scope="row">${el.tipo}</th>
@@ -225,7 +243,7 @@ function indicadoresGestor(){
                         }
                     }) 
                     
-                    if(valorSelectAnalisis=='pdps' || valorSelectAnalisis=='confirmacion'){
+                    if(valorSelectAnalisis=='pdps' || valorSelectAnalisis=='confirmacion' || valorSelectAnalisis=='pagos'){
                         html += 
                                     `</tbody>
                                     <thead class="footer-total text-center">

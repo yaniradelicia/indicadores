@@ -1654,7 +1654,7 @@ class IndicadorController extends Controller
 
     
             $tsql1="
-                select date(ges_cli_com_fec) as fec,sum(ges_cli_com_can) as can_clientes
+                select date(pag_cli_fec) as fec,sum(pag_cli_mon) as can_clientes
                 from
                 (select cli_cod,ges_cli_fec,ges_cli_com_can,pag_cli_mon, pag_cli_fec,ges_cli_com_fec
                 FROM pago_cliente_2 as p
@@ -1700,7 +1700,7 @@ class IndicadorController extends Controller
             $datos1=DB::connection('mysql2')->select(DB::raw($sql1));
 
             $tsql2="
-                select date(ges_cli_com_fec) as fec,sum(ges_cli_com_can) as can_clientes
+                select date(pag_cli_fec) as fec,sum(pag_cli_mon) as can_clientes
                 from
                 (select cli_cod,ges_cli_fec,ges_cli_com_can,pag_cli_mon, pag_cli_fec,ges_cli_com_fec
                 FROM pago_cliente_2 as p
@@ -1746,7 +1746,7 @@ class IndicadorController extends Controller
             $datos2=DB::connection('mysql2')->select(DB::raw($sql2));
 
             $tsql3="
-                select date(ges_cli_com_fec) as fec,sum(ges_cli_com_can) as can_clientes
+                select date(pag_cli_fec) as fec,sum(pag_cli_mon) as can_clientes
                 from
                 (select cli_cod,ges_cli_fec,ges_cli_com_can,pag_cli_mon, pag_cli_fec,ges_cli_com_fec
                 FROM pago_cliente_2 as p

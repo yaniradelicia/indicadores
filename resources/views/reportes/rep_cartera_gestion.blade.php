@@ -75,6 +75,7 @@ Indicadores
                                 <option class="option" value="gestion">GESTION</option>
                                 <option class="option" value="pdp">PDP</option>
                                 <option class="option" value="confirmacion">CONFIRMACION</option>
+                                <option class="option" value="pagos">PAGOS</option>
                             </select>
                         </div> 
                     </div>

@@ -58,6 +58,7 @@ Indicadores
                                 <option class="option" value="gestion">GESTIÓN</option>
                                 <option class="option" value="pdps">PDPS</option>
                                 <option class="option" value="confirmacion">CONFIRMACIÓN</option>
+                                <option class="option" value="pagos">PAGOS</option>
                             </select>
                         </div> 
                     </div>

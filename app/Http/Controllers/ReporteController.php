@@ -967,6 +967,79 @@ class ReporteController extends Controller
         //dd($sq2);
     }
 
+    public function buscarCarteraUbicPagos($car,$fec_i,$fec_f){
+        $sql="
+            select * 
+            FROM
+            (
+            select 
+                ubic as tipo,
+                count(cartera) as clientes,
+                sum(capital) as capital,
+                sum(saldo_deuda) as deuda,
+                sum(monto_camp) as importe,
+                sum(cliente_pago) as clientes_pagos,
+                sum(capital_pago) as capital_pagos,
+                sum(importe_pago) as importe_pagos,
+                sum(monto_pagos) as monto_pagos,
+                (sum(cliente_pago)/count(cartera))*100 as cobertura,
+                (sum(monto_pagos)/sum(monto_camp))*100 as recupero
+            FROM
+            (
+                    SELECT
+                    (CASE 
+                        WHEN res_id_FK IN ( 38, 6, 22, 41 ) THEN 'CRFN'
+                        WHEN res_id_FK IN ( 2, 37, 33, 10, 1, 8, 43, 39, 7, 3, 5, 9, 34, 17, 21, 18, 28, 30, 35, 36, 46, 47, 48, 49 ) THEN 'CONTACTO'
+                        WHEN res_id_FK IN ( 19, 27, 12, 26, 13, 4, 11, 12, 20, 14, 15, 16, 23, 24, 29, 31 ) THEN 'ILOCALIZADO'
+                        WHEN res_id_FK IN ( 45, 25, 44 ) THEN 'NO CONTACTO'
+                        WHEN res_id_FK IN ( 32 ) THEN 'NO DISPONIBLE'
+                        ELSE 'SIN GESTIÓN'
+                    end) as ubic,
+                    cartera,
+                    if(capital is null,0,capital) as capital,
+                    if(saldo_deuda is null,0,saldo_deuda) as saldo_deuda,
+                    if(monto_camp is null,0,monto_camp) as monto_camp,
+                    if(cliente_pago is null,0,cliente_pago) as cliente_pago,
+                    capital_pago,
+                    importe_pago,
+                    monto_pagos
+                    FROM
+                    (
+                    SELECT 
+                    cartera,
+                    capital,
+                    saldo_deuda,
+                    monto_camp,
+                    count(pag_cli_cod) as cant_pagos,
+                    sum(pag_cli_mon) as monto_pagos,
+                    if(pag_cli_cod is null,0,capital) as capital_pago,
+                    if(pag_cli_cod is null,0,monto_camp) as importe_pago,
+                    if(pag_cli_cod is null,0,1) as cliente_pago,
+                    (select max(ges_cli_id)
+                        from cliente c 
+                        inner join gestion_cliente g on c.cli_id=g.cli_id_FK
+                        where c.cli_cod=i.cuenta
+                        and c.car_id_FK=i.car_id_FK
+                        and (date(ges_cli_fec) between '$fec_i' and '$fec_f')
+                    ) as maxid
+                    FROM indicadores.cartera_detalle i
+                    LEFT join pago_cliente_2 p on p.pag_cli_cod=i.cuenta and p.car_id_FK=$car and date(pag_cli_fec) between date('$fec_i') and date('$fec_f')
+                    WHERE 
+                    i.car_id_fk=$car
+                    and date_format(fecha,'%Y%m') in (date_format('$fec_i','%Y%m'),date_format('$fec_f','%Y%m'))
+                    group by cuenta
+                    ) t
+                    LEFT JOIN gestion_cliente gg ON t.maxid=gg.ges_cli_id
+            ) tt
+            group by ubic
+            Order by clientes desc
+            ) ttt
+            where clientes_pagos>0
+        ";
+        $query=DB::select(DB::raw($sql));
+        return $query;
+    }
+
     /*-----------------------cierre ubicabilidad----------------------------------------*/
     /*-----------------------------------------------------------------------------*/
 
@@ -1005,7 +1078,7 @@ class ReporteController extends Controller
                 WHEN monto_camp >= 3000 THEN "D: [3000-+>"
                 END) AS monto_camp'),
                 //'capital as capital_t','saldo_deuda as saldo_deuda_t','monto_camp as monto_camp_t'
-                'tramo','dep_ind','prioridad','dep','entidades','score'
+                'tramo','dep_ind','prioridad','dep','entidades','score','rango_sueldo'
                 )
         ->where('cd.car_id_fk','=',$car)
         ->whereBetween(DB::raw('(date_format(pag_cli_fec,"%Y-%m-%d"))'),array($fec_i,$fec_f))
@@ -1069,7 +1142,7 @@ class ReporteController extends Controller
                 WHEN monto_camp >= 3000 THEN 'D: [3000-+>'
                 END) AS monto_camp,
                 capital as capital_t,saldo_deuda as saldo_deuda_t,monto_camp as monto_camp_t,
-                tramo,dep_ind,prioridad,dep,entidades,score
+                tramo,dep_ind,prioridad,dep,entidades,score,rango_sueldo
             from indicadores.cartera_detalle
             WHERE date_format(fecha,'%Y-%m')=date_format('$fec_i','%Y-%m') and car_id_fk=$car
             ) t

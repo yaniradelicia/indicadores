@@ -108,20 +108,34 @@ class GestionController extends Controller
         return response()->json(['gestiones' => $gestiones, 'pdps' => $pdps]);
     }
 
-    public function repConsolidadoFecha()
+    public function repConsolidadoFecha($fecha)
     {
         //fecha_registro=DATE_FORMAT(date_add(NOW(), INTERVAL -1 DAY),'%Y-%m-%d')
-        $sql="
+        /*$sql="
             select *
             from indicadores.reporte_gestion
             where fecha_registro = (
                 SELECT MAX(fecha_registro)
                 FROM indicadores.reporte_gestion
             )
+        ";*/
+        /*$query=DB::connection('mysql2')->select(DB::raw($sql));*/
+        $sq1="
+            select *
+            from indicadores.reporte_gestion
+            where fecha_registro = '$fecha'
         ";
-        $query=DB::connection('mysql2')->select(DB::raw($sql));
+        $data1=DB::connection('mysql2')->select(DB::raw($sq1));
+        $sq2="
+            select *
+            from indicadores.reporte_gestion
+            where MONTH(fecha_registro) = MONTH(date_add('$fecha', INTERVAL -1 MONTH))
+                AND DAY(fecha_registro)=day('$fecha')
+        ";
+        $data2=DB::connection('mysql2')->select(DB::raw($sq2));
 
-        return $query;
+        //return $query;
+        return response()->json(['data1' => $data1, 'data2' => $data2]);
     }
 
 }

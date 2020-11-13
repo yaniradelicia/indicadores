@@ -276,6 +276,87 @@ class IndicadorGestorController extends Controller
         return $conf;
     }
 
+    public static function buscarGestorPagos($car,$firma,$tip,$fec_i, $fec_f){
+        if($car==0){
+            $sqlCar="
+                select car_id_FK,encargado from sub_empleado
+                WHERE emp_firma like '%$firma'
+            ";
+            $cartera=DB::select(DB::raw($sqlCar));
+            foreach($cartera as $c){
+                $car_id = $c->car_id_FK;
+                $encargado=$c->encargado;
+            }
+            $usuario=$encargado;
+            $car=$car_id;
+        }else{
+            $sqlCar="
+                select car_id_FK,encargado from sub_empleado
+                WHERE emp_firma like '%$firma'
+            ";
+            $cartera=DB::select(DB::raw($sqlCar));
+            foreach($cartera as $c){
+                $encargado=$c->encargado;
+            }
+            $usuario=$encargado;
+            $car=$car;
+        }
+
+        $sql="
+            select 
+            t.$tip as tipo,
+            count(pag_cli_cod) as cant_clientes,
+            sum(monto_pago) as monto,
+            sum(can_pago) as cantidad,
+            sum(cde.capital) as total_capital,
+            sum(cde.saldo_deuda) as total_deuda,
+            sum(cde.monto_camp) as total_importe
+            from
+                (
+                select 
+                    pag_cli_cod,
+                                        sum(pag_cli_mon) as monto_pago,
+                    count(pag_cli_mon) as can_pago,
+                    if(tramo<=2016,2016,tramo) as tramo,
+                    (CASE 
+                        WHEN capital <500 THEN 'A: [0-500>'
+                        WHEN capital >= 500 and capital < 1000 THEN 'B: [500-1000>'
+                        WHEN capital >= 1000 and capital < 3000 THEN 'C: [1000-3000>'
+                        WHEN capital >= 3000 THEN 'D: [3000-+>'
+                    END) AS capital,
+                    (CASE 
+                        WHEN saldo_deuda <500 THEN 'A: [0-500>'
+                        WHEN saldo_deuda >= 500 and saldo_deuda < 1000 THEN 'B: [500-1000>'
+                        WHEN saldo_deuda >= 1000 and saldo_deuda < 3000 THEN 'C: [1000-3000>'
+                        WHEN saldo_deuda >= 3000 THEN 'D: [3000-+>'
+                    END) AS saldo_deuda,
+                    (CASE 
+                        WHEN monto_camp <500 THEN 'A: [0-500>'
+                        WHEN monto_camp >= 500 and monto_camp < 1000 THEN 'B: [500-1000>'
+                        WHEN monto_camp >= 1000 and monto_camp < 3000 THEN 'C: [1000-3000>'
+                        WHEN monto_camp >= 3000 THEN 'D: [3000-+>'
+                    END) AS monto_camp,
+                    dep_ind,prioridad,dep,entidades,score,rango_sueldo
+                    from pago_cliente_2 as pc
+                    inner join indicadores.pago_cliente as p on pc.pag_cli_cod=p.pago_cli_cod
+                    inner join indicadores.cartera_detalle as cd on pc.pag_cli_cod=cd.cuenta
+                    where cd.car_id_fk=$car and pc.car_id_FK=$car and p.car_id=$car
+                    and (date_format(pag_cli_fec,'%Y-%m-%d')) between '$fec_i' and '$fec_f'
+                    and (date_format(fecha,'%Y-%m'))=(date_format('$fec_i','%Y-%m'))
+                    and (date_format(pag_cli_fec,'%Y-%m'))=(date_format('$fec_i','%Y-%m'))
+                    and pago_gestor = $usuario
+                    group by pag_cli_cod
+                ) t
+            inner join indicadores.cartera_detalle as cde on t.pag_cli_cod=cde.cuenta
+            where 
+                cde.car_id_fk=$car
+                and (date_format(fecha,'%Y-%m'))=(date_format('$fec_i','%Y-%m'))
+            group by tipo
+        ";
+        $pagos=DB::select(DB::raw($sql));
+        return $pagos;
+    }
+
     public static function buscarGestorUbic($car,$firma,$fec_i, $fec_f){
         /*$sql="
             SELECT

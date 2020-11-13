@@ -297,9 +297,9 @@ function mostrarDatos(id,car,cant){
                         `
             contenedorUbic.innerHTML = htmlUbic;
             /**---fin ubic--------- */
-            $('#miModal').modal('show');
-                $("#miModal").on("hidden.bs.modal", function(){
-                    $(".cont-body").html("");
+            $('#modal-editar').modal('show');
+                $("#modal-editar").on("hidden.bs.modal", function(){
+                    $(".body").html("");
                 });
         })
 }
