@@ -14,12 +14,22 @@ class IndicadorGestorController extends Controller
      */
     public function index()
     {
-        $sql="
+        /*$sql="
             select car_id_FK,car_nom as cartera
             from sub_empleado as e
             inner join cartera as c
             on e.car_id_FK=c.car_id
             where emp_est=0 and car_est=0 and car_pas=0
+            group by car_id_FK
+            order by car_nom asc
+        ";*/
+        $sql="
+            select car_id_fk as car_id_FK, cartera
+            from indicadores.cartera_detalle as cd
+            inner join creditoy_cobranzas.cartera as c
+            on cd.car_id_fk=c.car_id
+            where DATE_FORMAT(fecha,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m') 
+            and car_est=0 and car_pas=0
             group by car_id_FK
             order by car_nom asc
         ";
@@ -76,7 +86,7 @@ class IndicadorGestorController extends Controller
         
         $sql="
             select 
-                t.$tip as tipo,
+                trim(t.$tip) as tipo,
                 count(cli_cod) as cant_clientes,
                 sum(cant_gestion) as cant_gestion,
                 sum(cde.capital) as total_capital,
@@ -147,7 +157,7 @@ class IndicadorGestorController extends Controller
 
         $sql="
             select 
-                t.$tip as tipo,
+                trim(t.$tip) as tipo,
                 count(cli_cod) as cant_clientes,
 				sum(monto_pdp) as monto,
 				sum(can_pdp) as cantidad,
@@ -220,7 +230,7 @@ class IndicadorGestorController extends Controller
 
         $sql="
             select 
-                t.$tip as tipo,
+                trim(t.$tip) as tipo,
                 count(cli_cod) as cant_clientes,
 				sum(monto_conf) as monto,
 				sum(can_conf) as cantidad,
@@ -280,7 +290,7 @@ class IndicadorGestorController extends Controller
         if($car==0){
             $sqlCar="
                 select car_id_FK,encargado from sub_empleado
-                WHERE emp_firma like '%$firma'
+                WHERE emp_firma like '%$firma' and emp_est=0
             ";
             $cartera=DB::select(DB::raw($sqlCar));
             foreach($cartera as $c){
@@ -292,7 +302,7 @@ class IndicadorGestorController extends Controller
         }else{
             $sqlCar="
                 select car_id_FK,encargado from sub_empleado
-                WHERE emp_firma like '%$firma'
+                WHERE emp_firma like '%$firma' and emp_est=0
             ";
             $cartera=DB::select(DB::raw($sqlCar));
             foreach($cartera as $c){
@@ -304,8 +314,8 @@ class IndicadorGestorController extends Controller
 
         $sql="
             select 
-            t.$tip as tipo,
-            count(pag_cli_cod) as cant_clientes,
+            trim(t.$tip) as tipo,
+            count(pago_cli_cod) as cant_clientes,
             sum(monto_pago) as monto,
             sum(can_pago) as cantidad,
             sum(cde.capital) as total_capital,
@@ -314,9 +324,9 @@ class IndicadorGestorController extends Controller
             from
                 (
                 select 
-                    pag_cli_cod,
-                                        sum(pag_cli_mon) as monto_pago,
-                    count(pag_cli_mon) as can_pago,
+                    pago_cli_cod,
+                    sum(pago_cli_mon) as monto_pago,
+                    count(pago_cli_mon) as can_pago,
                     if(tramo<=2016,2016,tramo) as tramo,
                     (CASE 
                         WHEN capital <500 THEN 'A: [0-500>'
@@ -337,17 +347,16 @@ class IndicadorGestorController extends Controller
                         WHEN monto_camp >= 3000 THEN 'D: [3000-+>'
                     END) AS monto_camp,
                     dep_ind,prioridad,dep,entidades,score,rango_sueldo
-                    from pago_cliente_2 as pc
-                    inner join indicadores.pago_cliente as p on pc.pag_cli_cod=p.pago_cli_cod
-                    inner join indicadores.cartera_detalle as cd on pc.pag_cli_cod=cd.cuenta
-                    where cd.car_id_fk=$car and pc.car_id_FK=$car and p.car_id=$car
-                    and (date_format(pag_cli_fec,'%Y-%m-%d')) between '$fec_i' and '$fec_f'
+                    from indicadores.pago_cliente as p
+                    inner join indicadores.cartera_detalle as cd on p.pago_cli_cod=cd.cuenta
+                    where cd.car_id_fk=$car and p.car_id=$car
+                    and (date_format(pago_cli_fec,'%Y-%m-%d')) between '$fec_i' and '$fec_f'
                     and (date_format(fecha,'%Y-%m'))=(date_format('$fec_i','%Y-%m'))
-                    and (date_format(pag_cli_fec,'%Y-%m'))=(date_format('$fec_i','%Y-%m'))
+                    and date_format(pago_cli_fec,'%Y-%m')=(date_format('$fec_i','%Y-%m'))
                     and pago_gestor = $usuario
-                    group by pag_cli_cod
+                    group by pago_cli_cod
                 ) t
-            inner join indicadores.cartera_detalle as cde on t.pag_cli_cod=cde.cuenta
+            inner join indicadores.cartera_detalle as cde on t.pago_cli_cod=cde.cuenta
             where 
                 cde.car_id_fk=$car
                 and (date_format(fecha,'%Y-%m'))=(date_format('$fec_i','%Y-%m'))
@@ -597,6 +606,96 @@ class IndicadorGestorController extends Controller
                 and (date_format(fecha,'%Y-%m'))=(date_format('$fec_i','%Y-%m'))
                 and gg.ges_cli_det like '%$firma'
             group by tipo
+        ";
+        $ubic=DB::select(DB::raw($sql));
+        return $ubic;
+    }
+
+    public static function buscarGestorUbicPagos($car,$firma,$fec_i, $fec_f){
+        if($car==0){
+            $sqlCar="
+                select car_id_FK,encargado from sub_empleado
+                WHERE emp_firma like '%$firma' and emp_est=0
+            ";
+            $cartera=DB::select(DB::raw($sqlCar));
+            foreach($cartera as $c){
+                $car_id = $c->car_id_FK;
+                $encargado=$c->encargado;
+            }
+            $usuario=$encargado;
+            $car=$car_id;
+        }else{
+            $sqlCar="
+                select car_id_FK,encargado from sub_empleado
+                WHERE emp_firma like '%$firma' and emp_est=0
+            ";
+            $cartera=DB::select(DB::raw($sqlCar));
+            foreach($cartera as $c){
+                $encargado=$c->encargado;
+            }
+            $usuario=$encargado;
+            $car=$car;
+        }
+
+        $sql="
+            select * 
+            FROM
+            (
+            select 
+                ubic as tipo,
+                count(cartera) as cant_clientes,
+                sum(capital) as total_capital,
+                sum(saldo_deuda) as total_deuda,
+                sum(monto_camp) as total_importe,
+                sum(cliente_pago) as cantidad,
+                sum(monto_pagos) as monto
+            FROM
+            (
+                SELECT
+                (CASE 
+                    WHEN res_id_FK IN ( 38, 6, 22, 41 ) THEN 'CRFN'
+                    WHEN res_id_FK IN ( 2, 37, 33, 10, 1, 8, 43, 39, 7, 3, 5, 9, 34, 17, 21, 18, 28, 30, 35, 36, 46, 47, 48, 49 ) THEN 'CONTACTO'
+                    WHEN res_id_FK IN ( 19, 27, 12, 26, 13, 4, 11, 12, 20, 14, 15, 16, 23, 24, 29, 31 ) THEN 'ILOCALIZADO'
+                    WHEN res_id_FK IN ( 45, 25, 44 ) THEN 'NO CONTACTO'
+                    WHEN res_id_FK IN ( 32 ) THEN 'NO DISPONIBLE'
+                    ELSE 'SIN GESTIÓN'
+                end) as ubic,
+                cartera,
+                if(capital is null,0,capital) as capital,
+                if(saldo_deuda is null,0,saldo_deuda) as saldo_deuda,
+                if(monto_camp is null,0,monto_camp) as monto_camp,
+                if(cliente_pago is null,0,cliente_pago) as cliente_pago,
+                monto_pagos
+                FROM
+                (
+                SELECT 
+                cartera,
+                capital,
+                saldo_deuda,
+                monto_camp,
+                sum(pago_cli_mon) as monto_pagos,
+                count(pago_cli_mon) as cliente_pago,
+                (select max(ges_cli_id)
+                    from cliente c 
+                    inner join gestion_cliente g on c.cli_id=g.cli_id_FK
+                    where c.cli_cod=i.cuenta and ges_cli_det like '%$firma'
+                    and c.car_id_FK=i.car_id_FK
+                    and (date(ges_cli_fec) between '$fec_i' and '$fec_f')
+                ) as maxid
+                FROM indicadores.cartera_detalle i
+                LEFT join indicadores.pago_cliente p on p.pago_cli_cod=i.cuenta and p.car_id=$car and date(pago_cli_fec) between date('$fec_i') and date('$fec_f')
+                WHERE 
+                i.car_id_fk=$car and pago_gestor = $usuario
+                and date_format(fecha,'%Y%m') in (date_format('$fec_i','%Y%m'),date_format('$fec_f','%Y%m'))
+                group by cuenta
+                ) t
+                LEFT JOIN gestion_cliente gg ON t.maxid=gg.ges_cli_id
+                WHERE gg.ges_cli_det like '%$firma'
+            ) tt
+            group by ubic
+            Order by cant_clientes desc
+            ) ttt
+            where cantidad>0
         ";
         $ubic=DB::select(DB::raw($sql));
         return $ubic;

@@ -130,6 +130,7 @@ Route::group(['middleware' => ['auth']], function(){
     Route::get('gestor/buscargestor_ubic/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbic');
     Route::get('gestor/buscargestor_ubic_pdp/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbicPDPS');
     Route::get('gestor/buscargestor_ubic_conf/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbicCONF');
+    Route::get('gestor/buscargestor_ubic_pagos/{car}/{firma}/{fec_i}/{fec_f}', 'IndicadorGestorController@buscarGestorUbicPagos');
 
 
     //asignacion de firmas

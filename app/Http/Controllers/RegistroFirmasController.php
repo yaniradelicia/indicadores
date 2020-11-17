@@ -108,7 +108,7 @@ class RegistroFirmasController extends Controller
             ) t
             left join sub_empleado s on 
             t.firma like CONCAT('%', s.emp_firma)
-            WHERE s.emp_firma not in ('')
+            WHERE s.emp_firma not in ('') and emp_est=0
             Group by pag_cli_id,pag_cli_fec,pag_cli_mon,firma
             ) w
             Group by pag_cli_id,pag_cli_fec,pag_cli_mon
@@ -235,7 +235,7 @@ class RegistroFirmasController extends Controller
             ) t
             left join sub_empleado s on 
             t.firma like CONCAT('%', s.emp_firma)
-            WHERE s.emp_firma not in ('')
+            WHERE s.emp_firma not in ('') and emp_est=0
             Group by pag_cli_id,pag_cli_fec,pag_cli_mon,firma
             ) w
             Group by pag_cli_id,pag_cli_fec,pag_cli_mon
@@ -326,7 +326,7 @@ class RegistroFirmasController extends Controller
             ) t
             left join sub_empleado s on 
             t.firma like CONCAT('%', s.emp_firma)
-            WHERE s.emp_firma not in ('')
+            WHERE s.emp_firma not in ('') and emp_est=0
             Group by cli_cod,firma
         ";
 
@@ -352,6 +352,12 @@ class RegistroFirmasController extends Controller
                 $sqlCarUsu="
                     SELECT * from sub_empleado
                     WHERE car_id_FK in (2,88,89) and emp_est=0
+                    GROUP BY encargado
+                ";
+            }else if($cartera==20 || $cartera==70 || $cartera==72){
+                $sqlCarUsu="
+                    SELECT * from sub_empleado
+                    WHERE car_id_FK in (20,70,72) and emp_est=0
                     GROUP BY encargado
                 ";
             }else{

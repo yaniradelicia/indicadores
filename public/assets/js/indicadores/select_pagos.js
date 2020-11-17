@@ -245,6 +245,7 @@ function indicadoresGestion(){
             totales.cli_est_total += parseInt(el.cli_est_total);
             totales.suma_cap_total += parseFloat(el.suma_cap_total);
             totales.suma_ic_total += parseFloat(el.suma_ic_total);
+            
             html += 
                                 `<tr>
                                     <th scope="row">${el.anio}</th>
@@ -256,7 +257,7 @@ function indicadoresGestion(){
                                     <td>${formatoMoneda(el.importe)}</td>
                                     <td>${formatoMoneda(el.monto)}</td>
                                     <td>${parseInt(el.cantidad)/parseInt(el.cli_est_total)>0? Math.round10((parseInt(el.cantidad)/parseInt(el.cli_est_total)*100),-2):'0'}%</td>
-                                    <td>${parseFloat(el.monto)/parseFloat(el.suma_ic_total)>0? Math.round10((parseFloat(el.monto)/parseFloat(el.suma_ic_total)*100),-2):'0'}%</td>
+                                    <td>${el.suma_ic_total>0? Math.round10((parseFloat(el.monto)/parseFloat(el.suma_ic_total)*100),-2):'0'}%</td>
                                 </tr>`
             })        
             html += 
@@ -272,7 +273,7 @@ function indicadoresGestion(){
                                     <th scope="row">${formatoMoneda(totales.importe)}</th>
                                     <th scope="row">${formatoMoneda(totales.monto)}</th>
                                     <th>${parseInt(totales.cantidad)/parseInt(totales.cli_est_total)>0? Math.round10((parseInt(totales.cantidad)/parseInt(totales.cli_est_total)*100),-2):'0'}%</th>
-                                    <th>${parseFloat(totales.monto)/parseFloat(totales.suma_ic_total)>0? Math.round10((parseFloat(totales.monto)/parseFloat(totales.suma_ic_total)*100),-2):'0'}%</th>
+                                    <th>${totales.suma_ic_total>0? Math.round10((parseFloat(totales.monto)/parseFloat(totales.suma_ic_total)*100),-2):'0'}%</th>
                                 </tr>
                             </thead>
                         </table>`                  
